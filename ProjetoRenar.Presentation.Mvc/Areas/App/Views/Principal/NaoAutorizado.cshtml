@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Icon = "fa fa-exclamation-circle";
+    ViewBag.Titulo = "Acesso Não Permitido";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-small">
+            <div class="card-body text-center">
+
+                <h4 class="text-danger">Erro. Acesso não autorizado</h4>
+                <div class="text-danger">
+                    Seu perfil de usuário não está habilitado para acessar este recurso do sistema.
+                </div>
+
+                <div class="mt-4">
+                    <a href="/app/principal/index" class="btn btn-primary">Ir para a página inicial</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

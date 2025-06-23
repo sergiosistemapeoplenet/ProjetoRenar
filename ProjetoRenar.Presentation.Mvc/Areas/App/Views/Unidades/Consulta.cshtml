@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Icon = "fa fa-window-maximize";
+    ViewBag.Titulo = "Consultar lojas";
+    ViewBag.Pagina = "Consultar lojas";
+    ViewBag.Subtitulo = "Pesquisar lojas no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Consulta de lojas</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            <form method="post" action="/app/unidades/consulta">
+
+                <div class="row mb-3 mt-2">
+                    <div class="col-md-6">
+                        <input type="text"
+                               value="@ViewBag.Nome"
+                               name="nome"
+                               style="height: 34px;"
+                               class="form-control"
+                               placeholder="Digite o nome aqui para efetuar a busca"
+                               autocomplete="off"
+                               data_placement="bottom"
+                               data_toggle="popover"
+                               data_trigger="focus"
+                               title="Consulta de tipos de produto"
+                               data_content="Informe todo ou parte do nome do tipo de produto desejado." />
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="ativo">
+                            <option value="1" @(ViewBag.Ativo == 1 ? "selected" : "")>Ativos</option>
+                            <option value="0" @(ViewBag.Ativo == 0 ? "selected" : "")>Inativos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary" onclick="loading()" type="submit">
+                            <i class="fa fa-search"></i> Pesquisar
+                        </button>
+                        <a href="/app/unidades/cadastro" class="btn btn-success" onclick="loading()">
+                            <i class="fa fa-plus"></i> Incluir lojas
+                        </a>
+                    </div>
+                </div>
+
+
+                @using ProjetoRenar.Application.ViewModels.Unidades
+                @if (ViewBag.Dados != null)
+                {
+                    var consulta = (List<ConsultaUnidadeViewModel>)ViewBag.Dados;
+
+                    if (consulta != null && consulta.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover" id="tabela">
+                                <thead>
+                                    <tr>
+                                        <th>Loja</th>
+                                        <th>Razão social</th>
+                                        <th width="25%">Endereço</th>
+                                        <th>Contato</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in consulta)
+                                    {
+                                        <tr>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
+                                                <div>@item.NomeUnidade.ToUpper()</div>                                               
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
+                                                <div>
+                                                    @item.RazaoSocial
+                                                </div>
+                                                <div>
+                                                    CNPJ: @item.CNPJ
+                                                </div>
+                                                <div>
+                                                    Região: @item.Regiao.NomeRegiao
+                                                </div>
+                                                <div>
+                                                    @item.HorarioFuncionamento
+                                                </div>
+                                                <div>
+                                                    @if (item.FlagUnidadePadrao)
+                                                    {
+                                                        <span class="badge badge-success">
+                                                            <i class="fa fa-check-circle"></i>&nbsp;UNIDADE PADRÃO
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div>
+                                                    @(!string.IsNullOrEmpty(item.SerialImpressora) ? "Impressora: " + item.SerialImpressora : "")
+                                                </div>
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
+                                                <div>
+                                                    @item.Endereco
+                                                </div>
+                                                <div>
+                                                    @if (!string.IsNullOrEmpty(item.Cep))
+                                                    {
+                                                        <span> CEP: @item.Cep</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
+                                                <div>
+                                                    @item.NomeContato
+                                                </div>
+                                                <div>
+                                                    @item.NumeroContato
+                                                </div>
+                                                <div>
+                                                    @item.EmailContato
+                                                </div>
+                                            </td>                                            
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+        function atualizar(id) {
+            $('#loading').show();
+            window.location = '/app/unidades/edicao/' + id;
+        }
+    </script>
+}

@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Icon = "fa fa-list-alt";
+    ViewBag.Titulo = "Grupos de preparações";
+    ViewBag.Pagina = "Grupos de preparações";
+    ViewBag.Subtitulo = "Editar grupos de preparações no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Presentation.Mvc.Areas.App.Models.GruposPreparacoesEdicaoViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-pencil-alt"></i>&nbsp;Edição de grupos de preparações</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div>
+                    @Html.HiddenFor(model => model.IDGrupoPreparacao)
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label>Nome do grupo:</label>
+                        @Html.TextBoxFor(model => model.NomeGrupoPreparacao, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeGrupoPreparacao)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-pencil-alt"></i> Atualizar dados
+                        </button>
+                        @if (Model.FlagAtivo.Value)
+                        {
+                            <a href="/app/impettusgrupospreparacoes/inativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IDGrupoPreparacao.ToString())"
+                               class="btn btn-danger" onclick="loading()">
+                                <i class="fa fa-trash-alt"></i> Inativar
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/app/impettusgrupospreparacoes/reativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IDGrupoPreparacao.ToString())" class="btn btn-info" onclick="loading()">
+                                <i class="fa fa-upload"></i> Reativar
+                            </a>
+                        }
+                        <a href="/app/impettusgrupospreparacoes/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,134 @@
+﻿@model ProjetoRenar.Application.ViewModels.Usuarios.FiltroConsultaUsuarioViewModel
+
+@{
+    ViewBag.Icon = "fa fa-user-plus";
+    ViewBag.Titulo = "Consultar usuários";
+    ViewBag.Pagina = "Consultar usuários";
+    ViewBag.Subtitulo = "Pesquisar usuários no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Consulta de usuários</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            <form method="post" action="/app/usuarios/consulta">
+
+                <div class="row mb-3 mt-2">
+                    <div class="col-md-6">
+                        <input type="text"
+                               value="@ViewBag.Nome"
+                               name="nome"
+                               style="height: 34px;"
+                               class="form-control"
+                               placeholder="Digite o nome do usuário para efetuar a busca"
+                               autocomplete="off"
+                               data_placement="bottom"
+                               data_toggle="popover"
+                               data_trigger="focus"
+                               title="Consulta de usuários"
+                               data_content="Informe todo ou parte do nome do usuário desejado." />
+                    </div>
+                    <div class="col-md-2">
+                        @Html.DropDownListFor(model => model.IdPerfil, Model.Perfis, "Selecione o perfil", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IdPerfil)
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="ativo">
+                            <option value="1" @(ViewBag.Ativo == 1 ? "selected" : "")>Ativos</option>
+                            <option value="0" @(ViewBag.Ativo == 0 ? "selected" : "")>Inativos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col-md-8">
+                        @Html.DropDownListFor(model => model.IdUnidade, Model.Unidades, "Selecione a loja", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IdUnidade)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary" onclick="loading()" type="submit">
+                            <i class="fa fa-search"></i> Pesquisar
+                        </button>
+                        <a href="/app/usuarios/cadastro" class="btn btn-success" onclick="loading()">
+                            <i class="fa fa-plus"></i> Incluir usuário
+                        </a>
+                    </div>
+                </div>
+
+
+                @using ProjetoRenar.Application.ViewModels.Usuarios
+                @if (ViewBag.Dados != null)
+                {
+                    var consulta = (List<ConsultaUsuarioViewModel>)ViewBag.Dados;
+
+                    if (consulta != null && consulta.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover" id="tabela">
+                                <thead>
+                                    <tr>
+                                        <th>Email do usuário</th>
+                                        <th>Perfil</th>
+                                        <th>Loja</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in consulta)
+                                    {
+                                        <tr>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUsuario.ToString())')">
+                                                <div>@item.EmailUsuario.ToLower()</div>
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUsuario.ToString())')">
+                                                <div>@item.Perfil.NomePerfil.ToUpper()</div>
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUsuario.ToString())')">
+                                                @if (!string.IsNullOrEmpty(item.NomeUnidade))
+                                                {
+                                                    <div>
+                                                        @item.NomeUnidade
+                                                    </div>
+                                                    <div>
+                                                        <small>@item.Endereco</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div>Não definido.</div>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+        function atualizar(id) {
+            $('#loading').show();
+            window.location = '/app/usuarios/edicao/' + id;
+        }
+    </script>
+}

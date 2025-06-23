@@ -1,0 +1,105 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using ProjetoRenar.Application.Profiles;
+using ProjetoRenar.Domain.Contracts.Cryptographies;
+using ProjetoRenar.Domain.Contracts.Messages;
+using ProjetoRenar.Domain.Contracts.Repositories;
+using ProjetoRenar.Domain.Contracts.Services;
+using ProjetoRenar.Domain.Services;
+using ProjetoRenar.Infra.Cryptography;
+using ProjetoRenar.Infra.Message;
+using ProjetoRenar.Infra.Repository;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using ProjetoRenar.Presentation.Mvc.Filters;
+
+namespace ProjetoRenar.Presentation.Mvc
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            new DependencyInjection(services, Configuration);
+
+            AutoMapperConfig.Register();
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                //options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddAuthentication
+                (CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+
+            services.AddMvc();
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            services.AddSession();
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            app.UseDeveloperExceptionPage();
+
+            /*
+            if (!env.IsDevelopment())
+            {
+                app.UseExceptionHandler("/error/500");
+            }
+            */
+
+            app.Use(async (ctx, next) =>
+            {
+                await next();
+
+                if (ctx.Response.StatusCode == 404 && !ctx.Response.HasStarted)
+                {
+                    string originalPath = ctx.Request.Path.Value;
+                    ctx.Items["originalPath"] = originalPath;
+                    ctx.Request.Path = "/error/404";
+                    await next();
+                }
+                else if (ctx.Response.StatusCode == 500 && !ctx.Response.HasStarted)
+                {
+                    string originalPath = ctx.Request.Path.Value;
+                    ctx.Items["originalPath"] = originalPath;
+                    ctx.Request.Path = "/error/500";
+                    await next();
+                }
+            });
+
+            app.UseMiddleware<NoCache>();
+
+            app.UseStaticFiles();
+            app.UseCookiePolicy();
+            app.UseAuthentication();
+
+            app.UseSession();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(name: "areas", template: "{area:exists}/{controller=principal}/{action=index}/{id?}");
+                routes.MapRoute(name: "default", template: "{controller=account}/{action=login}/{id?}");
+            });
+        }
+    }
+}

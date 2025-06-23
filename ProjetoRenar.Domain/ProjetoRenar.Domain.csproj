@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Contracts\Repositories\IConfiguracoesSolicitacaoRepository.cs" />
+    <Compile Remove="Contracts\Repositories\ITipoSolicitacaoRepository.cs" />
+    <Compile Remove="Contracts\Services\IConfiguracoesSolicitacaoDomainService.cs" />
+    <Compile Remove="Contracts\Services\ITipoSolicitacaoDomainService.cs" />
+    <Compile Remove="Services\ConfiguracoesSolicitacaoDomainService.cs" />
+    <Compile Remove="Services\TipoSolicitacaoDomainService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DevExpress.Xpo" Version="19.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Sidetech.Framework">
+      <HintPath>..\Sidetech.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

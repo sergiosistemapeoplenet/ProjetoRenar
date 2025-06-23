@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Icon = "fa fa-cogs";
+    ViewBag.Titulo = "Grupos de produtos";
+    ViewBag.Pagina = "Grupos de produtos";
+    ViewBag.Subtitulo = "Editar grupos de produtos no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Presentation.Mvc.Areas.App.Models.GruposProdutoEdicaoViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-pencil-alt"></i>&nbsp;Edição de grupos de produtos</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div>
+                    @Html.HiddenFor(model => model.IDGrupoProduto)
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label>Nome do grupo:</label>
+                        @Html.TextBoxFor(model => model.NomeGrupoProduto, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeGrupoProduto)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-pencil-alt"></i> Atualizar dados
+                        </button>
+                        @if (Model.FlagAtivo.Value)
+                        {
+                            <a href="/app/impettusgruposproduto/inativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IDGrupoProduto.ToString())"
+                               class="btn btn-danger" onclick="loading()">
+                                <i class="fa fa-trash-alt"></i> Inativar
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/app/impettusgruposproduto/reativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IDGrupoProduto.ToString())" class="btn btn-info" onclick="loading()">
+                                <i class="fa fa-upload"></i> Reativar
+                            </a>
+                        }
+                        <a href="/app/impettusgruposproduto/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Icon = "fa fa-tasks";
+    ViewBag.Titulo = "Cadastrar produtos";
+    ViewBag.Pagina = "Cadastrar produtos";
+    ViewBag.Subtitulo = "Incluir produtos no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.Produtos.CadastroProdutoViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-plus-circle"></i>&nbsp;Cadastro de produto</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div style="padding-bottom: 10px;font-weight: 500;">
+                    DADOS PRINCIPAIS:
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Nome do produto:</label>
+                        @Html.TextBoxFor(model => model.NomeProduto, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeProduto)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Código barras:</label>
+                        @Html.TextBoxFor(model => model.CodigoBarra, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.CodigoBarra)
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <label>Peso:</label>
+                        @Html.TextBoxFor(model => model.Peso, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.Peso)
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Fatia?</label>
+                        <div>
+                            @Html.RadioButtonFor(model => model.FlagFatiacopo, true) <span>Sim</span>
+                        </div>
+                        <div>
+                            @Html.RadioButtonFor(model => model.FlagFatiacopo, false) <span>Não</span>
+                        </div>
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.FlagFatiacopo)
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+
+                        <div class="table-responsive"  style="border: 1px solid #ccc; padding: 10px;">
+                            <table class="table table-sm table-borderless table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="40%"></th>
+                                        <th class="text-center">100g</th>
+                                        <th class="text-center">Porção</th>
+                                        <th class="text-center">% VD</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Valor energético:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.ValorEnergetico, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.ValorEnergetico)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoValorEnergetico, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoValorEnergetico)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.ValorEnergeticoValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.ValorEnergeticoValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Carboidratos:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.Carboidratos, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.Carboidratos)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoCarboidratos, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoCarboidratos)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.CarboidratosValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.CarboidratosValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Açúcares totais:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.AcucarTotal, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.AcucarTotal)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoAcucarTotal, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoAcucarTotal)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.AcucarTotalValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.AcucarTotalValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Açúcares adicionados:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.AcucarAdicionado, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.AcucarAdicionado)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoAcucarAdicionado, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoAcucarAdicionado)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.AcucarAdicionadoValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.AcucarAdicionadoValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Proteínas:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.Proteina, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.Proteina)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoProteina, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoProteina)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.ProteinaValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.ProteinaValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Gorduras totais:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.GorduraTotal, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.GorduraTotal)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoGorduraTotal, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoGorduraTotal)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.Gtotvd, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.Gtotvd)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Gordura Saturada:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.GorduraSaturada, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.GorduraSaturada)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoGorduraSaturada, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoGorduraSaturada)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.GorduraSaturadaValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.GorduraSaturadaValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Gordura Trans:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.GorduraTrans, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.GorduraTrans)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoGorduraTrans, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoGorduraTrans)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.GorduraTransValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.GorduraTransValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Fibra Alimentar:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.FibraAlimentar, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.FibraAlimentar)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoFibraAlimentar, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoFibraAlimentar)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.FibraAlimentarValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.FibraAlimentarValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding-right: 20px; text-align: right">Sódio:</td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.Sodio, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.Sodio)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.PorcaoSodio, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.PorcaoSodio)
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @Html.TextBoxFor(model => model.SodioValorDiario, new { @class = "form-control text-center" })
+                                            <div class="text-danger">
+                                                @Html.ValidationMessageFor(model => model.SodioValorDiario)
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3">
+                            <label>Link do QRCode:</label>
+                            @Html.TextBoxFor(model => model.Link, new { @class = "form-control" })
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="row mb-3">
+                            <div class="col-md-9">
+                                <label>Tipo de produto:</label>
+                                @Html.DropDownListFor(model => model.IDTipoProduto, Model.TiposProduto, "Escolha uma opção",
+                                    new { @class = "form-control" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.IDTipoProduto)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Dias de validade:</label>
+                                @Html.TextBoxFor(model => model.DiasValidade, new { @class = "form-control" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.DiasValidade)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Porção embalagem:</label>
+                                @Html.TextBoxFor(model => model.PorcaoEmbalagem, new { @class = "form-control" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.PorcaoEmbalagem)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Porção fatia:</label>
+                                @Html.TextBoxFor(model => model.PorcaoFatia, new { @class = "form-control" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.PorcaoFatia)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Receita:</label>
+                                @Html.TextAreaFor(model => model.Receita, new { @class = "form-control", @rows = "3" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.Receita)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Informações 1:</label>
+                                @Html.TextAreaFor(model => model.Info1, new { @class = "form-control", @rows = "3" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.Info1)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Informações 2:</label>
+                                @Html.TextAreaFor(model => model.Info2, new { @class = "form-control", @rows = "3" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.Info2)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label>Informações 3:</label>
+                                @Html.TextAreaFor(model => model.Info3, new { @class = "form-control", @rows = "3" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.Info3)
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Realizar Cadastro
+                        </button>
+                        <a href="/app/produtos/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

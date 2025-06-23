@@ -1,0 +1,23 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:58952",
+      "sslPort": 0
+    }
+  },
+  "profiles": {
+    "ProjetoRenar.Presentation.Mvc": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:5890/"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress"
+    }
+  }
+}

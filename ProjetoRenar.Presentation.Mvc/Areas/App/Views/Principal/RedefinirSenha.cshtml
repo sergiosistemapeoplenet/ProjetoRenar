@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Icon = "fa fa-key";
+    ViewBag.Titulo = "Redefinir senha";
+    ViewBag.Pagina = "Redefinir senha";
+    ViewBag.Subtitulo = "Redefinir senha.";
+}
+
+@model ProjetoRenar.Application.ViewModels.Usuarios.RedefinirSenhaViewModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Redefinição de senha de usuário</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm("RedefinirSenha", "Principal", FormMethod.Post))
+            {
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label>Informe a senha atual:</label>
+                        @Html.PasswordFor(model => model.SenhaAtualUsuario, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.SenhaAtualUsuario)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Informe a nova senha:</label>
+                        @Html.PasswordFor(model => model.NovaSenhaUsuario, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NovaSenhaUsuario)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Confirme a nova senha:</label>
+                        @Html.PasswordFor(model => model.NovaSenhaConfirmacao, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NovaSenhaConfirmacao)
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button class="btn btn-success" onclick="loading()" type="submit">
+                            Salvar alterações
+                        </button>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script>
+       
+    </script>
+}
+
+
+@section styles{
+
+}
+
+@section modals {
+
+}

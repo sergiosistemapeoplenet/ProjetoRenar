@@ -1,0 +1,166 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <UserSecretsId>974474b7-fcfe-498c-bb0d-63fff6567ad3</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Areas\App\Views\ConsultaTeste\**" />
+    <Compile Remove="Areas\App\Views\NovaPasta1\**" />
+    <Compile Remove="wwwroot\empresas\**" />
+    <Content Remove="Areas\App\Views\ConsultaTeste\**" />
+    <Content Remove="Areas\App\Views\NovaPasta1\**" />
+    <Content Remove="wwwroot\empresas\**" />
+    <EmbeddedResource Remove="Areas\App\Views\ConsultaTeste\**" />
+    <EmbeddedResource Remove="Areas\App\Views\NovaPasta1\**" />
+    <EmbeddedResource Remove="wwwroot\empresas\**" />
+    <None Remove="Areas\App\Views\ConsultaTeste\**" />
+    <None Remove="Areas\App\Views\NovaPasta1\**" />
+    <None Remove="wwwroot\empresas\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Areas\App\Controllers\ConsultaTeste.cs" />
+    <Compile Remove="Areas\App\Controllers\ConsultaTesteController.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="wwwroot\Fonts\Arial.ttf" />
+    <Content Remove="wwwroot\scripts\JavaScript-autoComplete-master.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="34.0.2" />
+    <PackageReference Include="Captcha" Version="4.4.2" />
+    <PackageReference Include="DevExpress.AspNetCore.Core" Version="19.2.6" />
+    <PackageReference Include="DevExtreme.AspNet.Core" Version="19.2.6" />
+    <PackageReference Include="DevExtreme.Web" Version="19.2.6" />
+    <PackageReference Include="DNTCaptcha.Core" Version="2.7.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.1" />
+    <PackageReference Include="itext7" Version="7.1.13" />
+    <PackageReference Include="iTextSharp" Version="5.5.13.1" />
+    <PackageReference Include="itextsharp.xmlworker" Version="5.5.13.1" />
+    <PackageReference Include="Microsoft.AspNet.WebPages" Version="3.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Antiforgery" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.4" />
+    <PackageReference Include="OwaspHeaders.Core" Version="7.5.1" />
+    <PackageReference Include="PagedList.Mvc" Version="4.5.0" />
+    <PackageReference Include="QRCoder" Version="1.4.1" />
+    <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Areas\App\Views\Shared\_LayoutRecolhido.cshtml" />
+    <None Include="wwwroot\css\devextreme\fonts\Roboto-300.woff2" />
+    <None Include="wwwroot\css\devextreme\fonts\Roboto-400.woff2" />
+    <None Include="wwwroot\css\devextreme\fonts\Roboto-500.woff2" />
+    <None Include="wwwroot\css\devextreme\fonts\Roboto-700.woff2" />
+    <None Include="wwwroot\css\devextreme\icons\dxicons.woff2" />
+    <None Include="wwwroot\css\devextreme\icons\dxiconsios.woff2" />
+    <None Include="wwwroot\css\devextreme\icons\dxiconsmaterial.woff2" />
+    <None Include="wwwroot\Fonts\Arial.ttf" />
+    <None Include="wwwroot\js\devextreme\aspnet\dx.aspnet.data.js" />
+    <None Include="wwwroot\js\devextreme\aspnet\dx.aspnet.mvc.js" />
+    <None Include="wwwroot\js\devextreme\bootstrap.js" />
+    <None Include="wwwroot\js\devextreme\bootstrap.min.js" />
+    <None Include="wwwroot\js\devextreme\cldr.js" />
+    <None Include="wwwroot\js\devextreme\cldr.min.js" />
+    <None Include="wwwroot\js\devextreme\cldr\event.js" />
+    <None Include="wwwroot\js\devextreme\cldr\event.min.js" />
+    <None Include="wwwroot\js\devextreme\cldr\supplemental.js" />
+    <None Include="wwwroot\js\devextreme\cldr\supplemental.min.js" />
+    <None Include="wwwroot\js\devextreme\cldr\unresolved.js" />
+    <None Include="wwwroot\js\devextreme\cldr\unresolved.min.js" />
+    <None Include="wwwroot\js\devextreme\dx-diagram.js" />
+    <None Include="wwwroot\js\devextreme\dx-diagram.min.js" />
+    <None Include="wwwroot\js\devextreme\dx-gantt.js" />
+    <None Include="wwwroot\js\devextreme\dx-gantt.min.js" />
+    <None Include="wwwroot\js\devextreme\dx.all.debug.js" />
+    <None Include="wwwroot\js\devextreme\dx.all.js" />
+    <None Include="wwwroot\js\devextreme\dx.viz-web.debug.js" />
+    <None Include="wwwroot\js\devextreme\dx.viz-web.js" />
+    <None Include="wwwroot\js\devextreme\dx.viz.debug.js" />
+    <None Include="wwwroot\js\devextreme\dx.viz.js" />
+    <None Include="wwwroot\js\devextreme\dx.web.debug.js" />
+    <None Include="wwwroot\js\devextreme\dx.web.js" />
+    <None Include="wwwroot\js\devextreme\globalize.js" />
+    <None Include="wwwroot\js\devextreme\globalize.min.js" />
+    <None Include="wwwroot\js\devextreme\globalize\currency.js" />
+    <None Include="wwwroot\js\devextreme\globalize\currency.min.js" />
+    <None Include="wwwroot\js\devextreme\globalize\date.js" />
+    <None Include="wwwroot\js\devextreme\globalize\date.min.js" />
+    <None Include="wwwroot\js\devextreme\globalize\message.js" />
+    <None Include="wwwroot\js\devextreme\globalize\message.min.js" />
+    <None Include="wwwroot\js\devextreme\globalize\number.js" />
+    <None Include="wwwroot\js\devextreme\globalize\number.min.js" />
+    <None Include="wwwroot\js\devextreme\jquery.js" />
+    <None Include="wwwroot\js\devextreme\jquery.min.js" />
+    <None Include="wwwroot\js\devextreme\jszip.js" />
+    <None Include="wwwroot\js\devextreme\jszip.min.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.cs.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.de.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.el.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.en.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.es.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.fi.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.fr.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.hu.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.it.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.ja.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.nl.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.pt.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.ru.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.sl.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.sv.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.tr.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.vi.js" />
+    <None Include="wwwroot\js\devextreme\localization\dx.messages.zh.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\africa.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\canada.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\eurasia.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\europe.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\usa.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-data\world.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-utils\dx.vectormaputils.debug.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-utils\dx.vectormaputils.js" />
+    <None Include="wwwroot\js\devextreme\vectormap-utils\dx.vectormaputils.node.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="DevExtreme.AspNet.Data" Version="2.6.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjetoRenar.Application\ProjetoRenar.Application.csproj" />
+    <ProjectReference Include="..\ProjetoRenar.CrossCutting.Configurations\ProjetoRenar.CrossCutting.Configurations.csproj" />
+    <ProjectReference Include="..\ProjetoRenar.Domain\ProjetoRenar.Domain.csproj" />
+    <ProjectReference Include="..\ProjetoRenar.Infra.Cryptography\ProjetoRenar.Infra.Cryptography.csproj" />
+    <ProjectReference Include="..\ProjetoRenar.Infra.Message\ProjetoRenar.Infra.Message.csproj" />
+    <ProjectReference Include="..\ProjetoRenar.Infra.Repository\ProjetoRenar.Infra.Repository.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Sidetech.Framework">
+      <HintPath>..\Sidetech.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties appsettings_1json__JsonSchema="" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

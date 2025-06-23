@@ -1,0 +1,261 @@
+﻿@{
+    ViewBag.Icon = "fa fa-address-card";
+    ViewBag.Titulo = "Imprimir etiquetas";
+    ViewBag.Pagina = "Imprimir etiquetas";
+    ViewBag.Subtitulo = "Realizar impressão de etiquetas.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.Etiquetas.ImprimirEtiquetasViewModel
+
+@using ProjetoRenar.Domain.Entities
+
+@{
+    var tipos = (List<TipoProduto>)TempData["TiposDeProduto"];
+    var produtos = (List<Produto>)TempData["Produtos"];
+    var minhaContaUsuario = Newtonsoft.Json.JsonConvert.DeserializeObject<ProjetoRenar.Application.ViewModels.Usuarios.MinhaContaViewModel>(User.Identity.Name);
+}
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-print"></i>&nbsp;Realizar impressão de etiquetas</h4>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                @using (Html.BeginForm("Index", "Principal", FormMethod.Post, new { @id = "FormProduto" }))
+                {
+                    <div class="row">
+                        <div class="col-md-10">
+                            @Html.TextBoxFor(model => model.NomeProduto, new { @class = "form-control", @placeholder = "Digite o nome do produto e pressione ENTER ou clique em 'Pesquisar produtos'", @onchange = "submeterFormulario()" })
+                            <div class="text-danger">
+                                @Html.ValidationMessageFor(model => model.NomeProduto)
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="submit" class="btn btn-primary btn-lg" value="Pesquisar produtos" onclick="loading()" />
+                        </div>
+                    </div>
+                }
+
+                @using (Html.BeginForm("Imprimir", "Principal", FormMethod.Post, new { @id = "FormularioImpressao" }))
+                {
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            @if (Model != null && Model.ListagemProdutos != null && Model.ListagemProdutos.Count > 0)
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="table-responsive" style="height: 400px; overflow-y: auto;">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center" width="60">
+                                                            <input type="checkbox" style="width: 18px; height: 18px;" />
+                                                        </th>
+                                                        <th>Produto</th>
+                                                        <th width="80" class="text-center">Qtd</th>
+                                                        <th width="160" class="text-center">Data de fabricação</th>
+                                                        <th width="160" class="text-center">Data de validade</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model.ListagemProdutos)
+                                                    {
+                                                        <tr>
+                                                            <td class="text-center">
+                                                                <input type="checkbox" name="IdsProdutos" value="@item.IDProduto" style="width: 18px; height: 18px;" />
+                                                            </td>
+                                                            <td><span style="font-weight: 500">@item.NomeProduto.ToUpper()</span> (@item.TipoProduto.NomeTipoProduto)</td>
+                                                            <td>
+                                                                <input type="number" min="1" value="0" name="QtdImpressoes" class="form-control text-center" style="font-weight: 600;" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" readonly value="@item.DataAtual.ToString("dd/MM/yyyy")" style="font-weight: 600;" class="form-control text-center" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" readonly value="@item.DataValidade.ToString("dd/MM/yyyy")" style="font-weight: 600;" class="form-control text-center" />
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mt-3">
+                                                    Produto(s) obtido(s): @Model.ListagemProdutos.Count
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mt-1 text-right">
+                                                    @if (Model != null && Model.LayoutEtiqueta != null)
+                                                    {
+                                                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#infolayout">
+                                                            &nbsp;<i class="fas fa-question-circle"></i> &nbsp;
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Botões fixos -->
+                    <div class="fixed-bottom bg-light p-2">
+                        <div class="text-right" style="padding-right: 40px; padding-top: 10px; padding-bottom: 10px; border: 1px solid #ccc; background-color: #fff; margin-left: 80px;">
+                            <button type="submit" class="btn btn-success"><i class="fa fa-print"></i>&nbsp;Imprimir Etiquetas</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <script>
+        // Intercepta o envio do formulário
+        document.getElementById("FormularioImpressao").addEventListener("submit", function (event) {
+            // Impede o envio padrão do formulário
+            event.preventDefault();
+
+            // Cria um objeto FormData para enviar os dados do formulário
+            var formData = new FormData(this);
+
+            // Faz uma requisição AJAX para o endpoint de impressão
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/app/principal/imprimir", true);
+            xhr.responseType = "blob"; // Espera uma resposta do tipo blob (para o PDF)
+            xhr.onload = function () {
+                if (this.status === 200) {
+                    // Cria uma URL temporária para o blob do PDF
+                    var url = window.URL.createObjectURL(this.response);
+
+                    // Cria um iframe oculto para abrir o PDF e imprimir
+                    var iframe = document.createElement("iframe");
+                    iframe.style.display = "none";
+                    iframe.src = url;
+                    document.body.appendChild(iframe);
+
+                    // Espera um pouco antes de imprimir
+                    setTimeout(function () {
+                        iframe.contentWindow.print();
+                    }, 1000); // Ajuste esse valor conforme necessário
+                }
+            };
+            xhr.send(formData);
+        });
+    </script>
+
+    <script>
+        function submeterFormulario() {
+            loading();
+            document.getElementById('FormProduto').submit();
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Quando o checkbox no cabeçalho é clicado
+            $("th input[type='checkbox']").click(function () {
+                // Pega o estado (marcado ou não) do checkbox do cabeçalho
+                var isChecked = $(this).is(':checked');
+
+                // Percorre todos os checkboxes nas células (<td>) e os define com o mesmo estado do checkbox do cabeçalho
+                $("tbody tr td input[type='checkbox']").each(function () {
+                    $(this).prop('checked', isChecked);
+                    var $this = $(this);
+                    // Encontra os campos de entrada na mesma linha do checkbox clicado
+                    var inputs = $this.closest('tr').find("input[type='number'], input[type='text']");
+                    // Habilita ou desabilita os campos baseado no estado do checkbox
+                    inputs.prop('disabled', !$this.is(':checked'));
+                    inputs.filter("input[type='number']").val($this.is(':checked') ? 1 : 0);
+                    // Adiciona ou remove a classe highlight baseado no estado do checkbox
+                    $this.closest('tr').toggleClass('highlight', $this.is(':checked'));
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Desabilita inicialmente todos os campos
+            $("tbody tr td input[type='number'], tbody tr td input[type='text']").prop('disabled', true);
+
+            // Manipula o click no checkbox do cabeçalho para marcar/desmarcar todos e habilitar/desabilitar campos
+            $("th input[type='checkbox']").click(function () {
+                var isChecked = $(this).is(':checked');
+
+                // Marca ou desmarca todos os checkboxes nas linhas
+                $("tbody tr td input[type='checkbox']").prop('checked', isChecked)
+                    .closest('tr').toggleClass('highlight', isChecked);
+
+                // Habilita ou desabilita todos os inputs baseado no estado do checkbox do cabeçalho
+                $("tbody tr td input[type='number'], tbody tr td input[type='text']").prop('disabled', !isChecked);
+            });
+
+            // Adiciona um manipulador de eventos para quando qualquer checkbox dentro do tbody é clicado
+            $("tbody tr td input[type='checkbox']").click(function () {
+                var $this = $(this);
+                // Encontra os campos de entrada na mesma linha do checkbox clicado
+                var inputs = $this.closest('tr').find("input[type='number'], input[type='text']");
+
+                // Habilita ou desabilita os campos baseado no estado do checkbox
+                inputs.prop('disabled', !$this.is(':checked'));
+
+                inputs.filter("input[type='number']").val($this.is(':checked') ? 1 : 0);
+
+                // Adiciona ou remove a classe highlight baseado no estado do checkbox
+                $this.closest('tr').toggleClass('highlight', $this.is(':checked'));
+            });
+        });
+    </script>
+}
+
+@section styles {
+    <style>
+        .highlight {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+    </style>
+}
+
+@section modals {
+    <div id="infolayout" class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLongTitle">Layout de impressão da etiqueta</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" class="text-dark">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        @if (Model != null && Model.LayoutEtiqueta != null)
+                        {
+                            <div>
+                                <strong class="text-primary">@Model.LayoutEtiqueta.NomeLayoutEtiqueta</strong>
+                            </div>
+                            <div>
+                                Código: @Model.LayoutEtiqueta.CodLayoutEtiqueta
+                            </div>
+                            <div>
+                                Número de colunas: @Model.LayoutEtiqueta.NumeroColunasImpressao
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

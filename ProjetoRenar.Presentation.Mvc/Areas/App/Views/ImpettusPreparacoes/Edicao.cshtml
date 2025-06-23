@@ -1,0 +1,164 @@
+﻿@model ProjetoRenar.Presentation.Mvc.Areas.App.Models.PreparacoesEdicaoViewModel
+
+@{
+    ViewBag.Icon = "fa fa-tasks";
+    ViewBag.Titulo = "Preparações";
+    ViewBag.Pagina = "Preparações";
+    ViewBag.Subtitulo = "Edição de preparação.";
+}
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title">
+                    <i class="fa fa-plus-circle"></i>&nbsp;Edição de preparação
+                </h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div>
+                    @Html.HiddenFor(model => model.IdPreparacao)
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-7">
+                        <label>Nome da preparação:</label>
+                        @Html.TextBoxFor(model => model.NomePreparacao, new { @class = "form-control" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.NomePreparacao)</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Grupo da preparação:</label>
+                        @Html.DropDownListFor(model => model.IdGrupoPreparacao, Model.Grupos, "Selecione", new { @class = "form-control" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.IdGrupoPreparacao)</div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>SIF:</label>
+                        @Html.TextBoxFor(model => model.Sif, new { @class = "form-control" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.Sif)</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <div style="margin-top: 40px;">
+                            @Html.CheckBoxFor(model => model.FlagResfriado, new { @id = "chkResfriado" }) &nbsp; <label>Resfriado</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Tipo Validade:</label>
+                        @Html.DropDownListFor(model => model.TipoValidadeResfriado, Model.Tipos, "Selecione", new { @class = "form-control", @readonly = "readonly", @id = "tipoValResfriado" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.TipoValidadeResfriado)</div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Validade:</label>
+                        @Html.TextBoxFor(model => model.ValidadeResfriado, new { @class = "form-control", @readonly = "readonly", @id = "valResfriado" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.ValidadeResfriado)</div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <div style="margin-top: 40px;">
+                            @Html.CheckBoxFor(model => model.FlagCongelado, new { @id = "chkCongelado" }) &nbsp; <label>Congelado</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Validade:</label>
+                        @Html.TextBoxFor(model => model.ValidadeCongelado, new { @class = "form-control", @readonly = "readonly", @id = "valCongelado" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.ValidadeCongelado)</div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-2">
+                        <div style="margin-top: 40px;">
+                            @Html.CheckBoxFor(model => model.FlagTemperaturaAmbiente, new { @id = "chkTemperatura" }) &nbsp; <label>Temperatura Ambiente</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Tipo Validade:</label>
+                        @Html.DropDownListFor(model => model.TipoValidadeTemperaturaAmbiente, Model.Tipos, "Selecione", new { @class = "form-control", @readonly = "readonly", @id = "tipoValTemp" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.TipoValidadeTemperaturaAmbiente)</div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Validade:</label>
+                        @Html.TextBoxFor(model => model.ValidadeTemperaturaAmbiente, new { @class = "form-control", @readonly = "readonly", @id = "valTemp" })
+                        <div class="text-danger">@Html.ValidationMessageFor(model => model.ValidadeTemperaturaAmbiente)</div>
+                    </div>
+                </div>
+                <br />
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-pencil-alt"></i> Atualizar dados
+                        </button>
+                        @if (Model.FlagAtivo)
+                        {
+                            <a href="/app/impettuspreparacoes/inativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IdPreparacao.ToString())"
+                               class="btn btn-danger" onclick="loading()">
+                                <i class="fa fa-trash-alt"></i> Inativar
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/app/impettuspreparacoes/reativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IdPreparacao.ToString())" class="btn btn-info" onclick="loading()">
+                                <i class="fa fa-upload"></i> Reativar
+                            </a>
+                        }
+                        <a href="/app/impettuspreparacoes/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function habilitarCampo(checkboxId, campos) {
+            const checkbox = document.getElementById(checkboxId);
+            const habilitar = checkbox.checked;
+
+            campos.forEach(campoId => {
+                const campo = document.getElementById(campoId);
+                if (campo.tagName.toLowerCase() === 'select') {
+                    campo.disabled = !habilitar;
+
+                    // Se estiver desabilitando, volta para o valor padrão
+                    if (!habilitar) {
+                        campo.value = "";
+                    }
+                } else {
+                    campo.readOnly = !habilitar;
+
+                    // Se estiver desabilitando, limpa o texto
+                    if (!habilitar) {
+                        campo.value = "";
+                    }
+                }
+            });
+        }
+
+        // Eventos para cada checkbox
+        document.getElementById('chkResfriado')?.addEventListener('change', function() {
+            habilitarCampo('chkResfriado', ['tipoValResfriado', 'valResfriado']);
+        });
+        document.getElementById('chkCongelado')?.addEventListener('change', function() {
+            habilitarCampo('chkCongelado', ['valCongelado']);
+        });
+        document.getElementById('chkTemperatura')?.addEventListener('change', function() {
+            habilitarCampo('chkTemperatura', ['tipoValTemp', 'valTemp']);
+        });
+
+        // Ativação inicial para refletir corretamente o estado atual dos checkboxes
+        habilitarCampo('chkResfriado', ['tipoValResfriado', 'valResfriado']);
+        habilitarCampo('chkCongelado', ['valCongelado']);
+        habilitarCampo('chkTemperatura', ['tipoValTemp', 'valTemp']);
+    </script>
+}

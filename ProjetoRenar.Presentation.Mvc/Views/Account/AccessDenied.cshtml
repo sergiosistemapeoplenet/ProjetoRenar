@@ -1,0 +1,51 @@
+﻿@{
+    Layout = null;
+}
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Acesso Negado</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="~/main.css" rel="stylesheet">
+    <link href="~/home.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css" />
+
+    <style>
+        .helper {
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body style="background: linear-gradient(rgba(52,131,160,.9), rgba(18,46,56,.9)), url('/images/bg.jpg') center no-repeat; background-size: cover;">
+    <div class="container h-100">
+        <div class="row align-items-center h-100">
+            <div class="col_mobile col-10 mx-auto">
+                <div class="card card-signin my-10">
+                    <div class="card-body text-center">
+                        <h1 class="text-danger">
+                            <i class="fa fa-ban"></i> Acesso Negado
+                        </h1>
+                        <p class="lead">Você não tem permissão para acessar esta página.</p>
+                        <p>Se você acredita que isso é um erro, entre em contato com o administrador do sistema.</p>
+                        <a href="/" class="btn btn-primary">Voltar para a Página Inicial</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        console.log("⚠️ ATENÇÃO: A inspeção deste código é destinada apenas a desenvolvedores autorizados. Qualquer acesso não autorizado é proibido por lei. ⚠️");
+    </script>
+</body>
+</html>

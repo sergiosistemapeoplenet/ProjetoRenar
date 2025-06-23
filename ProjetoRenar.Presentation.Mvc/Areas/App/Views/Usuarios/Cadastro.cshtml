@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Icon = "fa fa-user-plus";
+    ViewBag.Titulo = "Cadastrar usuários";
+    ViewBag.Pagina = "Cadastrar usuários";
+    ViewBag.Subtitulo = "Cadastrar usuários no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.Usuarios.CadastroUsuarioViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-plus-circle"></i>&nbsp;Cadastro de usuário</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label>Email do usuário:</label>
+                        @Html.TextBoxFor(model => model.EmailUsuario, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.EmailUsuario)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Senha de acesso:</label>
+                        @Html.PasswordFor(model => model.SenhaUsuario, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.SenhaUsuario)
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Confirme sua senha:</label>
+                        @Html.PasswordFor(model => model.SenhaConfirmacao, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.SenhaConfirmacao)
+                        </div>
+                    </div>                   
+                </div>
+
+                <div class="mb-3 row">
+                    <div class="col-md-4">
+                        <label>Perfil:</label>
+                        @Html.DropDownListFor(model => model.IDPerfil, Model.Perfis, "Escolha uma opção", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDPerfil)
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <label>Loja:</label>
+                        @Html.DropDownListFor(model => model.IDUnidade, Model.Unidades, "Escolha uma opção", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDUnidade)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-success" onclick="loading()">
+                            <i class="fa fa-plus"></i> Realizar Cadastro
+                        </button>
+                        <a href="/app/usuarios/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

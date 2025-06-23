@@ -1,0 +1,111 @@
+﻿@{
+    ViewBag.Icon = "fa fa-tasks";
+    ViewBag.Titulo = "Tipos de produtos";
+    ViewBag.Pagina = "Tipos de produtos";
+    ViewBag.Subtitulo = "Pesquisar tipos de produtos no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Consulta de tipos de produtos</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            <form method="post" action="/app/tiposproduto/consulta">
+
+                <div class="row mb-3 mt-2">
+                    <div class="col-md-6">
+                        <input type="text"
+                               value="@ViewBag.Nome"
+                               name="nome"
+                               style="height: 34px;"
+                               class="form-control"
+                               placeholder="Digite o nome aqui para efetuar a busca"
+                               autocomplete="off"
+                               data_placement="bottom"
+                               data_toggle="popover"
+                               data_trigger="focus"
+                               title="Consulta de tipos de produto"
+                               data_content="Informe todo ou parte do nome do tipo de produto desejado." />
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control" name="ativo">
+                            <option value="1" @(ViewBag.Ativo == 1 ? "selected" : "")>Ativos</option>
+                            <option value="0" @(ViewBag.Ativo == 0 ? "selected" : "")>Inativos</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary" onclick="loading()" type="submit">
+                            <i class="fa fa-search"></i> Pesquisar
+                        </button>
+                        <a href="/app/tiposproduto/cadastro" class="btn btn-success" onclick="loading()">
+                            <i class="fa fa-plus"></i> Incluir tipo de produto
+                        </a>
+                    </div>
+                </div>
+
+                @using ProjetoRenar.Application.ViewModels.TiposProduto
+                @if (ViewBag.Dados != null)
+                {
+                    var consulta = (List<ConsultaTipoProdutoViewModel>)ViewBag.Dados;
+
+                    if (consulta != null && consulta.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover" id="tabela">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo de produto</th>
+                                        <th>Layout da etiqueta</th>
+                                        <th width="340">Informações adicionais</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in consulta)
+                                    {
+                                        <tr>
+                                            <td class="clickable" style="cursor: pointer;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDTipoProduto.ToString())')">
+                                                @item.NomeTipoProduto.ToUpper()
+                                            </td>
+                                            <td class="clickable" style="cursor: pointer;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDTipoProduto.ToString())')">
+                                                @item.LayoutEtiqueta.NomeLayoutEtiqueta.ToUpper()
+                                            </td>
+                                            <td>
+                                                @if (item.FlagAltoAcucar == 1)
+                                                {
+                                                    <span class="badge badge-secondary">ALTO EM AÇÚCAR</span>
+                                                }
+                                                &nbsp;
+                                                @if (item.FlagAltoGorduraSaturada == 1)
+                                                {
+                                                    <span class="badge badge-secondary">ALTO EM GORDURA SATURADA</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function atualizar(id) {
+            $('#loading').show();
+            window.location = '/app/tiposproduto/edicao/' + id;
+        }
+    </script>
+}

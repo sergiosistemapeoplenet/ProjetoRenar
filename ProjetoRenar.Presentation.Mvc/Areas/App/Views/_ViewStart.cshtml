@@ -1,0 +1,5 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    Layout = HttpContextAccessor.HttpContext.Request.Cookies["LayoutPadrao"];
+}

@@ -1,0 +1,183 @@
+﻿@{
+    ViewBag.Icon = "fa fa-window-maximize";
+    ViewBag.Titulo = "Cadastrar lojas";
+    ViewBag.Pagina = "Cadastrar lojas";
+    ViewBag.Subtitulo = "Incluir lojas no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.Unidades.CadastroUnidadeViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-plus-circle"></i>&nbsp;Cadastro de lojas</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div style="padding-bottom: 10px; font-weight: 500;">
+                    DADOS PRINCIPAIS:
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Nome da loja:</label>
+                        @Html.TextBoxFor(model => model.NomeUnidade, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeUnidade)
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Razão social:</label>
+                        @Html.TextBoxFor(model => model.RazaoSocial, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.RazaoSocial)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">                  
+                    <div class="col-md-3">
+                        <label>CNPJ:</label>
+                        @Html.TextBoxFor(model => model.CNPJ, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.CNPJ)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Região:</label>
+                        @Html.DropDownListFor(model => model.IDRegiao, Model.Regioes, "Escolha uma opção", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDRegiao)
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding-bottom: 10px; font-weight: 500;">
+                    ENDEREÇO:
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label>Cep:</label>
+                        @Html.TextBoxFor(model => model.Cep, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.Cep)
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <label>Endereço:</label>
+                        @Html.TextBoxFor(model => model.Endereco, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.Endereco)
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding-bottom: 10px; font-weight: 500;">
+                    CONTATO:
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Nome do contato:</label>
+                        @Html.TextBoxFor(model => model.NomeContato, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeContato)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Telefone:</label>
+                        @Html.TextBoxFor(model => model.NumeroContato, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NumeroContato)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Email:</label>
+                        @Html.TextBoxFor(model => model.EmailContato, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.EmailContato)
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding-bottom: 10px; font-weight: 500;">
+                    DADOS ADICIONAIS:
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Horário de funcionamento:</label>
+                        @Html.TextBoxFor(model => model.HorarioFuncionamento, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.HorarioFuncionamento)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Serial da impressora:</label>
+                        @Html.TextBoxFor(model => model.SerialImpressora, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.SerialImpressora)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Imprime código de barras?:</label>
+                        <div>
+                            @Html.RadioButtonFor(model => model.FlagImprimeCodigoBarra, true) <span>Sim</span>
+                        </div>
+                        <div>
+                            @Html.RadioButtonFor(model => model.FlagImprimeCodigoBarra, false) <span>Não</span>
+                        </div>
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.FlagImprimeCodigoBarra)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Realizar Cadastro
+                        </button>
+                        <a href="/app/unidades/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $('#Cep').on('input', function () {
+                var cep = $(this).val().replace(/\D/g, ''); // Remove tudo que não for número
+
+                if (cep.length === 8) { // CEP deve ter 8 dígitos
+                    var url = "https://viacep.com.br/ws/" + cep + "/json/";
+
+                    $.getJSON(url, function (data) {
+                        if (!("erro" in data)) {
+                            var enderecoCompleto = data.logradouro + ', ' + data.bairro + ', ' + data.localidade + ', ' + data.uf;
+                            $('#Endereco').val(enderecoCompleto);
+                        } else {
+                            $('#Endereco').val("CEP não encontrado.");
+                        }
+                    }).fail(function () {
+                        $('#Endereco').val("Erro ao buscar CEP.");
+                    });
+                }
+            });
+        });
+
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Icon = "fa fa-tasks";
+    ViewBag.Titulo = "Tipos de produtos";
+    ViewBag.Pagina = "Tipos de produtos";
+    ViewBag.Subtitulo = "Incluir tipos de produtos no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.TiposProduto.CadastroTipoProdutoViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-plus-circle"></i>&nbsp;Cadastro de tipo de produto</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label>Nome do tipo de produto:</label>
+                        @Html.TextBoxFor(model => model.NomeTipoProduto, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.NomeTipoProduto)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Layout da etiqueta:</label>
+                        @Html.DropDownListFor(model => model.IDLayoutEtiqueta, Model.LayoutsEtiqueta, "Escolha uma opção",
+                            new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDLayoutEtiqueta)
+                        </div>
+                    </div>
+                    <div class="col-md-3">                       
+                        <div class="mt-4">
+                            <input type="checkbox" name="FlagAltoAcucar" value="1" @(ViewBag.FlagAltoAcucar != null && ViewBag.FlagAltoAcucar == 1 ? "checked" : "")/> &nbsp;&nbsp;
+                            <label>Alto em açúcar</label>       
+                        </div>
+                        <div style="margin-top: -10px;">
+                            <input type="checkbox" name="FlagAltoGorduraSaturada" value="1" @(ViewBag.FlagAltoGorduraSaturada != null && ViewBag.FlagAltoGorduraSaturada == 1 ? "checked" : "")/> &nbsp;&nbsp;
+                            <label>Alto em gordura saturada</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa fa-plus"></i> Realizar Cadastro
+                        </button>
+                        <a href="/app/tiposproduto/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,89 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29926.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Presentation", "1 - Presentation", "{7F977DC6-EF91-4F03-B033-1D7BFEEF1C24}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Domain", "3 - Domain", "{3777927D-DEB6-4AFA-AA60-B587B056EE30}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Application", "2 - Application", "{078CBBE3-7E4C-4DEF-9301-2F6EE6197395}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - InfraStructure", "4 - InfraStructure", "{D7828E9F-4FFC-42E4-ACC6-7DB798FCE1F8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.1 - Repository", "4.1 - Repository", "{828CCD9C-C998-4FB2-B770-B0AEB7EC482E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.2 - Message", "4.2 - Message", "{A770E3A9-901C-4ABF-AB70-8398901E854A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.3 - Cryptography", "4.3 - Cryptography", "{84C5D439-A622-44F4-A3A6-A8CFFEA68B0B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - CrossCutting", "5 - CrossCutting", "{2240FB75-1078-4A4C-9B28-D854CF20E35E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Presentation.Mvc", "ProjetoRenar.Presentation.Mvc\ProjetoRenar.Presentation.Mvc.csproj", "{464699CF-B48B-4082-96A0-9681701002E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Application", "ProjetoRenar.Application\ProjetoRenar.Application.csproj", "{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Domain", "ProjetoRenar.Domain\ProjetoRenar.Domain.csproj", "{44FD7A42-A35D-4D84-A00F-21F45A20FEC1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Infra.Repository", "ProjetoRenar.Infra.Repository\ProjetoRenar.Infra.Repository.csproj", "{11A46CA8-6750-4331-8889-7802CC914291}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Infra.Message", "ProjetoRenar.Infra.Message\ProjetoRenar.Infra.Message.csproj", "{5F2E6310-9C41-4254-8F8E-11E772324909}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.Infra.Cryptography", "ProjetoRenar.Infra.Cryptography\ProjetoRenar.Infra.Cryptography.csproj", "{C7902874-7720-41A1-80C1-C7799C38AB86}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjetoRenar.CrossCutting.Configurations", "ProjetoRenar.CrossCutting.Configurations\ProjetoRenar.CrossCutting.Configurations.csproj", "{6D064964-0643-4705-AACE-70E1C6D931E4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{464699CF-B48B-4082-96A0-9681701002E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{464699CF-B48B-4082-96A0-9681701002E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{464699CF-B48B-4082-96A0-9681701002E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{464699CF-B48B-4082-96A0-9681701002E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44FD7A42-A35D-4D84-A00F-21F45A20FEC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44FD7A42-A35D-4D84-A00F-21F45A20FEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44FD7A42-A35D-4D84-A00F-21F45A20FEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44FD7A42-A35D-4D84-A00F-21F45A20FEC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11A46CA8-6750-4331-8889-7802CC914291}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A46CA8-6750-4331-8889-7802CC914291}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A46CA8-6750-4331-8889-7802CC914291}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A46CA8-6750-4331-8889-7802CC914291}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F2E6310-9C41-4254-8F8E-11E772324909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F2E6310-9C41-4254-8F8E-11E772324909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F2E6310-9C41-4254-8F8E-11E772324909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F2E6310-9C41-4254-8F8E-11E772324909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7902874-7720-41A1-80C1-C7799C38AB86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7902874-7720-41A1-80C1-C7799C38AB86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7902874-7720-41A1-80C1-C7799C38AB86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7902874-7720-41A1-80C1-C7799C38AB86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D064964-0643-4705-AACE-70E1C6D931E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D064964-0643-4705-AACE-70E1C6D931E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D064964-0643-4705-AACE-70E1C6D931E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D064964-0643-4705-AACE-70E1C6D931E4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{828CCD9C-C998-4FB2-B770-B0AEB7EC482E} = {D7828E9F-4FFC-42E4-ACC6-7DB798FCE1F8}
+		{A770E3A9-901C-4ABF-AB70-8398901E854A} = {D7828E9F-4FFC-42E4-ACC6-7DB798FCE1F8}
+		{84C5D439-A622-44F4-A3A6-A8CFFEA68B0B} = {D7828E9F-4FFC-42E4-ACC6-7DB798FCE1F8}
+		{464699CF-B48B-4082-96A0-9681701002E7} = {7F977DC6-EF91-4F03-B033-1D7BFEEF1C24}
+		{5C0DE523-8A3A-47E8-9AC9-F6E90BBFE29D} = {078CBBE3-7E4C-4DEF-9301-2F6EE6197395}
+		{44FD7A42-A35D-4D84-A00F-21F45A20FEC1} = {3777927D-DEB6-4AFA-AA60-B587B056EE30}
+		{11A46CA8-6750-4331-8889-7802CC914291} = {828CCD9C-C998-4FB2-B770-B0AEB7EC482E}
+		{5F2E6310-9C41-4254-8F8E-11E772324909} = {A770E3A9-901C-4ABF-AB70-8398901E854A}
+		{C7902874-7720-41A1-80C1-C7799C38AB86} = {84C5D439-A622-44F4-A3A6-A8CFFEA68B0B}
+		{6D064964-0643-4705-AACE-70E1C6D931E4} = {2240FB75-1078-4A4C-9B28-D854CF20E35E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {95827099-4E56-44CF-981B-7126CB1F8689}
+	EndGlobalSection
+EndGlobal

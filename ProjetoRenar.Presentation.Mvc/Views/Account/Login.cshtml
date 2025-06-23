@@ -1,0 +1,196 @@
+﻿@{
+    Layout = null;
+}
+
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, DNTCaptcha.Core
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Renar Etiquetas - Acesso ao Sistema</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="~/main.css" rel="stylesheet">
+    <link href="~/home.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css" />
+
+    <style>
+        .helper {
+            display: inline-block;
+            height: 100%;
+            vertical-align: middle;
+        }
+    </style>
+
+</head>
+
+<body style="background: linear-gradient(rgba(52,131,160,.9), rgba(18,46,56,.9)), url('/images/bg.jpg') center no-repeat; background-size: cover;">
+
+    @Html.AntiForgeryToken()
+
+    <div>
+        <div id="loading">
+            <img id="loading-image" src="~/images/loading.gif" alt="Loading..." width="70" height="70" />
+        </div>
+
+        <div class="container h-100">
+            <div class="row align-items-center h-100">
+                <div class="col_mobile col-10 mx-auto">
+                    <div class="card card-signin my-10">
+                        <div class="card-body">
+
+                            <div class="row">
+
+                                @if (httpContextAccessor.HttpContext?.Session.GetString("urlBase") != null && httpContextAccessor.HttpContext.Session.GetString("urlBase").Contains("voalzira"))
+                                {
+                                    <div class="col-md-6 text-center" style="padding: 60px;">
+                                        <span class="helper"></span>
+                                        <img src="~/images/logo_cliente.png" class="img-fluid" />
+                                    </div>
+                                }
+
+                                @if (httpContextAccessor.HttpContext?.Session.GetString("urlBase") != null && httpContextAccessor.HttpContext.Session.GetString("urlBase").Contains("impettus"))
+                                {
+                                    <div class="col-md-6 text-center" style="padding: 20px;">
+                                        <img src="~/images/logo_cliente_impettus.png" style="margin-top: 110px;" class="img-fluid" />
+                                    </div>
+                                }
+
+                                <div class="col-md-6">
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-md-12 text-center">
+                                                    <img src="~/images/peoplenetlogo-novo-peq.png" class="img-fluid" />
+                                                </div>
+                                            </div>
+                                            <hr />
+                                        </div>
+                                    </div>
+
+                                    <h5 class="card-title text-center">
+                                        <i class="fas fa-sign-in-alt"></i>&nbsp;Acesso ao Sistema
+                                    </h5>
+
+                                    @model ProjetoRenar.Application.ViewModels.Usuarios.LoginViewModel
+
+                                    @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-signin" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+
+                                        <div class="form-label-group">
+                                            @Html.TextBoxFor(model => model.EmailUsuario, new { @id = "inputEmail", @class = "form-control", @placeholder = "Email", @autocomplete = "off" })
+                                            <span class="text-danger" style="font-size: 10pt;">@Html.ValidationMessageFor(model => model.EmailUsuario)</span>
+                                            <label for="inputEmail"><i class="fa fa-envelope" style="color: #ccc;"></i>&nbsp;&nbsp;Email</label>
+                                        </div>
+
+                                        <div class="form-label-group">
+                                            @Html.PasswordFor(model => model.SenhaUsuario, new { @id = "inputPassword", @class = "form-control", @placeholder = "Senha", @autocomplete = "off" })
+                                            <span class="text-danger" style="font-size: 10pt;">@Html.ValidationMessageFor(model => model.SenhaUsuario)</span>
+                                            <label for="inputPassword"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Senha</label>
+                                        </div>
+
+                                        <div class="row mb-3" style="margin-top: -5px;">                                           
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col-md-12 text-right">
+                                                        <a href="~/account/recuperarsenha" onclick="loading()">Esqueci minha Senha</a>
+                                                        @if (ViewBag.OpcaoPrimeiroAcesso == 1)
+                                                        {
+                                                            <br />
+                                                            <a href="~/account/primeiroacesso" onclick="loading()">Primeiro acesso</a>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                                                                
+                                        <button class="btn btn-primary btn-block text-uppercase"
+                                                type="submit" style="font-size: 11pt;" onclick="loading()">
+                                            <i class="fa fa-chevron-circle-right"></i>&nbsp;Entrar
+                                        </button> if (TempData["MensagemSucesso"] != null)
+                                        {
+                                            <br />
+                                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                @Html.Raw(TempData["MensagemSucesso"])
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div> }
+                                        else if (TempData["MensagemErro"] != null)
+                                        {
+                                            <br />
+                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                                @Html.Raw(TempData["MensagemErro"])
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>}
+                                    }
+
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                        
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <div style="color: #fff;">Copyright © 2024 | Versão 3.0</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script type="text/javascript" src="~/scripts/main.js"></script>
+        <script>
+
+            function loading() {
+                $('#loading').show();          
+            }
+
+        </script>
+
+        <script>
+            $(document).on('keydown', '#inputEmail', function (e) {
+                if (e.keyCode == 32) return false;
+            });
+        </script>
+
+        <script>
+            console.log("⚠️ ATENÇÃO: A inspeção deste código é destinada apenas a desenvolvedores autorizados. Qualquer acesso não autorizado é proibido por lei. ⚠️");
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var allInputs = document.querySelectorAll('input[type="text"], input[type="password"], textarea');
+                allInputs.forEach(function (input) {
+                    input.addEventListener('input', function () {
+                        this.value = this.value.replace(/</g, '').replace(/>/g, '');
+                    });
+                });
+            });
+        </script>
+
+    </div>
+</body>
+</html>

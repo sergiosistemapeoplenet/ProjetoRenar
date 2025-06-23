@@ -1,0 +1,2163 @@
+﻿@model PeopleNetRH.Application.ViewModels.Candidatos.FiltroCandidatoViewModel
+
+@using Newtonsoft.Json
+@{
+    ViewBag.Icon = "fa fa-address-card";
+    ViewBag.Titulo = "Gerenciar Candidatos";
+    ViewBag.Subtitulo = "Consulte os candidatos através do formulário de pesquisa.";
+    ViewBag.Candidato = "class=mm-active";
+    ViewBag.GestaoDePessoas = "class=mm-active";
+}
+
+
+
+<div id="painel_loading" class="text-center">
+    <br />
+    <img id="loading-image" src="/images/loading.gif" alt="Loading..." width="70" height="70" />
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="mensagemSucesso">
+
+        </div>
+
+    </div>
+</div>
+<input type="hidden" id="idCandidatoModal" value="" />
+<div class="mb-3 card">
+
+    <div id="painel_principal">
+
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Consulta de Candidatos</h4>
+            </div>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="mb-0 table table-hover" id="tabela">
+                <thead>
+                    <tr>
+                        <th align="center">Foto</th>
+                        <th width="18%">Nome do Candidato</th>
+                        <th width="50">Data de Alteração</th>
+                        <th width="20%">Empresa</th>
+                        <th width="11%">Processo Seletivo</th>
+                        <th width="10%">Etapa Atual</th>
+                        <th width="12%"></th>
+                        <th width="4%"></th>
+                        <th width="4%"></th>
+                        <th width="4%"></th>
+                        <th>&nbsp;&nbsp;&nbsp;Status</th>
+                        <th>Etapas</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+
+                    @if (Model.Consulta != null && Model.Consulta.Count > 0)
+                    {
+                        foreach (var item in Model.Consulta)
+                        {
+                            <tr>
+                                <td align="left" class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    <img src="/candidatos/@item.Foto?dummy=@(new Random().Next(9999))" onerror="this.src='/images/users/avatar.png'" style="width: 40px; border: 1px solid #3f6ad8;" />
+                                </td>
+                                <td class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    @item.Nome.ToUpper()
+                                    <div><small>CPF: @item.Cpf</small></div>
+                                </td>
+                                <td class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    @item.DataAlteracao.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    @if (!string.IsNullOrEmpty(item.NomeFantasia))
+                                    {
+                                        <span id="empresa@(item.IdCandidato)">@item.NomeFantasia.ToUpper()</span>
+
+                                    }
+                                    else
+                                    {
+                                        <span id="empresa@(item.IdCandidato)">-</span>
+
+                                    }
+                                </td>
+                                <td class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    @if (item.TipoCadastro == 1)
+                                    {
+                                        @if (!string.IsNullOrEmpty(item.Titulo))
+                                        {
+                                            <div id="processoSeletivo@(item.IdCandidato)">@item.Titulo</div>
+                                        }
+                                        else
+                                        {
+                                            <div id="processoSeletivo@(item.IdCandidato)">-</div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @if (!string.IsNullOrEmpty(item.Titulo))
+                                        {
+                                            <div id="processoSeletivo@(item.IdCandidato)">@item.Titulo</div>
+                                        }
+                                        else
+                                        {
+                                            <div id="processoSeletivo@(item.IdCandidato)">@(item.NomeVagaPretendida != null ? item.NomeVagaPretendida.ToUpper() : "-")</div>
+                                        }
+                                    }
+                                </td>
+                                <td class="clickable" onclick="atualizarCandidato(@item.IdCandidato)">
+                                    @*<div id="etapa@((item.EtapaAtual) != null ? item.EtapaAtual : "-" )"></div>*@
+                                    @if (item.EtapaAtual != null)
+                                    {
+                                        <span>@item.EtapaAtual.ToUpper()</span>
+                                    }
+                                </td>
+                                @{
+                                    item.Observacoes = string.Empty;
+                                    if (item != null && item.ExperienciaProfissional != null)
+                                    {
+                                        foreach (var exp in item.ExperienciaProfissional)
+                                        {
+                                            exp.ResumoAtividades = string.Empty;
+                                        }
+                                    }
+                                }
+
+                                @{
+                                    if (item.NomeFantasia != null)
+                                    {
+                                        item.NomeFantasia = item.NomeFantasia.Replace("'", string.Empty);
+                                    }
+
+                                    if (item.RazaoSocial != null)
+                                    {
+                                        item.RazaoSocial = item.RazaoSocial.Replace("'", string.Empty);
+                                    }
+
+                                    if (item.ExperienciaProfissional != null)
+                                    {
+                                        foreach (var emp in item.ExperienciaProfissional)
+                                        {
+                                            if (emp.Empresa != null)
+                                            {
+                                                emp.Empresa = emp.Empresa.Replace("'", string.Empty);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                <td align="center">
+                                    <a href="#" style="color: #808080;"
+                                       onclick="exbirCurriculo('@(JsonConvert.SerializeObject(item))')"
+                                       data-target="#janelacurriculo" data-toggle="modal"><i class="fa fa-file-alt"></i></a>
+                                    &nbsp;&nbsp;
+                                    @if (item.TipoCadastro == 1)
+                                    {
+                                        <a style="color: #808080; cursor: pointer;"
+                                           data-placement="right"
+                                           data-toggle="popover"
+                                           title="Cadastro realizado no sistema"
+                                           data-content="Usuário: @item.UsuarioCriacao em @item.DataCriacao.ToString(" dd/MM/yyyy HH:mm")">
+                                            <i class="fa fa-database"></i>
+                                        </a>
+                                    }
+                                    else if (item.TipoCadastro == 2)
+                                    {
+                                        <a style="color: #808080; cursor: pointer;"
+                                           data-placement="right"
+                                           data-toggle="popover"
+                                           title="Cadastro através de página de vagas"
+                                           data-content="Realizado em @item.DataCriacao.ToString(" dd/MM/yyyy HH:mm")">
+                                            <i class="fa fa-globe"></i>
+                                        </a>
+                                    }
+                                </td>
+
+                                <td align="center">
+                                    @if (!string.IsNullOrEmpty(item.Celular))
+                                    {
+                                        <a href="https://api.whatsapp.com/send?phone=55+@item.Celular" target="_blank" class="text-secondary" title="WhatsApp">
+                                            <strong><i class="fab fa-whatsapp"></i></strong>
+                                        </a>
+                                    }
+                                </td>
+                                <td align="center">
+                                    @if (item.Linkedin != null)
+                                    {
+                                        <a href="@item.Linkedin" target="_blank" class="text-secondary" title="LINKEDIN">
+                                            <i class='fab fa-linkedin-in'></i>
+                                        </a>
+
+                                    }
+                                </td>
+                                
+
+                                
+                                <td align="center">
+                                    <div id="operacao@(item.IdCandidato)">
+                                        @if (item.IdProcessoSeletivo != 0)
+                                        {
+                                            <a title="Etapas do Processo" href="#" id="btnModalEtapas@(item.IdCandidato)" onclick="obterEtapas('@item.IdCandidato', '@item.TipoContratacao', '@item.Local', '@item.Titulo','@item.IdProcessoSeletivo', '@item.NumVagas', '@(item.DataInicio.ToString(" dd/MM/yyyy") + " a " + item.DataTermino.ToString("dd/MM/yyyy"))')" class="badge badge-secondary" data-target="#janelaetapas" data-toggle="modal">
+                                                <i class="fa fa-business-time"></i>&nbsp;GERENCIAR
+                                            </a>
+
+
+                                        }
+                                        else
+                                        {
+                                            <a title="Associar candidato" href="#" onclick="abrirModalAssociacao('@item.IdCandidato')" class="badge badge-secondary" data-target="#janelaassociacao" data-toggle="modal">
+                                                <i class="fa fa-business-time"></i>&nbsp;GERENCIAR
+                                            </a>
+                                        }
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+
+    </div>
+
+</div>
+
+
+@section styles{
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css" />
+
+    <style>
+
+
+        .card-body {
+            flex: 1 1 auto;
+            padding: 1.25rem;
+        }
+
+        .card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background-color: #fff;
+            background-clip: border-box;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+        }
+
+        .toggle.ios, .toggle-on.ios, .toggle-off.ios {
+            border-radius: 20px;
+        }
+
+            .toggle.ios .toggle-handle {
+                border-radius: 20px;
+            }
+    </style>
+    <style>
+        .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+            background-color: #e9e9e9;
+        }
+
+        .clickable:hover {
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            border-left: 4px solid #3f6ad8;
+        }
+    </style>
+
+
+}
+
+@section scripts{
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.maskedinput/1.4.1/jquery.maskedinput.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+
+    <script>
+
+    var paginaConsulta = "@(ViewBag.PaginaConsulta != null ? ViewBag.PaginaConsulta : string.Empty)";
+    //Quando recarregar a página após fazer upload de arquivos.
+    var dadosModalArquivosCandidato = "@(ViewBag.IdentificadorModalCandidato != null ? ViewBag.IdentificadorModalCandidato : string.Empty)";
+
+    $(document).ready(function () {
+
+        //Carregar a página com a ultima pagina vista antes de dar refresh
+        if (paginaConsulta != "") {
+            $("#tabela").DataTable().page(parseInt(paginaConsulta)).draw(false);
+            if (dadosModalArquivosCandidato != "") {
+
+                var idCandidato = dadosModalArquivosCandidato.split(",")[0];
+                var idProcessoSeletivo = dadosModalArquivosCandidato.split(",")[1];
+                var idEtapa = dadosModalArquivosCandidato.split(",")[2];
+                @{
+                    var mensagemAberturaModalArquivo = "";
+                    if(TempData["MensagemEnvioArquivoSucesso"] != null)
+    {
+        mensagemAberturaModalArquivo = TempData["MensagemEnvioArquivoSucesso"].ToString();
+    }
+                         else if (TempData["MensagemEnvioArquivoErro"] != null) {
+        mensagemAberturaModalArquivo = TempData["MensagemEnvioArquivoErro"].ToString();
+    }
+                    }
+    var mensagem = "@(mensagemAberturaModalArquivo != string.Empty ? mensagemAberturaModalArquivo : null)";
+    var botaoCandidato = document.getElementById("btnModalEtapas" + dadosModalArquivosCandidato.split(",")[0]).click();
+    var divBotao = document.getElementById("operacao" + dadosModalArquivosCandidato.split(",")[0]);
+    var conteudoDiv = "<div style='display: none;'>";
+    conteudoDiv += `<a id='btnAbrirModalArquivoPosUpload${idCandidato}' href = '#' class='badge badge-primary' style = 'cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${idProcessoSeletivo},${idEtapa},'${mensagem}')\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;Enviar Arquivos</a>`;
+    conteudoDiv += "</div>";
+    divBotao.innerHTML += conteudoDiv;
+
+    setTimeout(function () {
+        document.getElementById(`btnAbrirModalArquivoPosUpload${idCandidato}`).click();
+    }, 500)
+                }
+
+            }
+
+    $(".data").datepicker({
+        dateFormat: 'dd/mm/yy',
+        dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+        dayNamesMin: ['D', 'S', 'T', 'Q', 'Q', 'S', 'S', 'D'],
+        dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        monthNames: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+        monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+        nextText: 'Próximo',
+        prevText: 'Anterior',
+        changeMonth: true,
+        changeYear: true
+    });
+
+    $(".data").mask("99/99/9999");
+
+    function formatarDataAtual() {
+        var data = new Date(),
+            dia = data.getDate().toString(),
+            diaF = (dia.length == 1) ? '0' + dia : dia,
+            mes = (data.getMonth() + 1).toString(), //+1 pois no getMonth Janeiro começa com zero.
+            mesF = (mes.length == 1) ? '0' + mes : mes,
+            anoF = data.getFullYear();
+        return diaF + "/" + mesF + "/" + anoF;
+    };
+
+    $("#busca_avancada").attr("class", "nav-link @(ViewBag.BuscaAvancada != null ? "active" : string.Empty)");
+    $("#busca_padrao").attr("class", "nav-link @(ViewBag.BuscaAvancada == null ? "active" : string.Empty)");
+
+    $("#tab-eg5-1").attr("class", "tab-pane @(ViewBag.BuscaAvancada != null ? "active" : string.Empty)");
+    $("#tab-eg5-0").attr("class", "tab-pane @(ViewBag.BuscaAvancada == null ? "active" : string.Empty)");
+
+    $("#painel_loading").css("display", "none");
+    $("#painel_principal").css("display", "block");
+
+    var idEmpresa = $("#IdEmpresa").val();
+    if (idEmpresa != "") {
+        $("#dropProcessos").prop("disabled", false);
+    }
+    else {
+        $("#dropProcessos").prop("disabled", true);
+        $("#etapaProcesso").prop("disabled", true);
+    }
+
+    var idProcessoSeletivo = $("#dropProcessos").val();
+    if (idProcessoSeletivo != null && idProcessoSeletivo != 0) {
+        $("#etapaProcesso").prop("disabled", false);
+    }
+    else {
+        $("#etapaProcesso").prop("disabled", true);
+    }
+
+    var filtroProcesso = $("#FiltroProcessoSeletivo").val();
+    if (filtroProcesso == 1) {
+        $(".collapse").removeClass("collapse hide").addClass("collapse show");
+    }
+
+        });
+
+
+
+    $("#dropProcessos").change(function () {
+        $("#etapaProcesso").html("<option value='0'>Selecione a etapa</option>");
+        var idProcesso = $("#dropProcessos").val();
+        if (idProcesso == 0) {
+            $("#etapaProcesso").prop("disabled", true);
+        }
+        else {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Content("~/app/Candidato/ObterEtapasProcessoSeletivo")',
+                data: { idProcessoSeletivo: $("#dropProcessos").val() },
+                async: false,
+                success: function (result) {
+
+                    var conteudo = "<option value='0'>Selecione a etapa</option>";
+                    for (var i = 0; i < result.length; i++) {
+                        conteudo += "<option value='" + result[i].idEtapa + "'>" + result[i].titulo + "</option>";
+                    }
+
+                    $("#etapaProcesso").html(conteudo);
+                    $("#etapaProcesso").attr("disabled", false);
+
+                }
+            });
+        }
+
+
+    });
+
+    </script>
+
+    <script>
+        function atualizarCandidato(id) {
+            $('#loading').show();
+            window.location = '/app/candidato/atualizar/' + id;
+        }
+    </script>
+
+    <script>
+    function habilitarCandidatoView(id) {
+        if (window.confirm("Deseja alterar o status do candidato para 'Habilitado' ?")) {
+            $("#loading").show();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Content("~/app/candidato/habilitarcandidato")',
+                data: { "idCandidato": id },
+                success: function (result) {
+                    $("#loading").hide();
+                    if (result == true) {
+                        $('#status' + id).html("<a href='#' class='badge badge-primary'><i class='fa fa-check-circle'></i>&nbsp; Habilitado</a>");
+
+                        var conteudo = "";
+                        conteudo += "<div class='alert alert-success alert-dismissible fade show' role='alert'>";
+                        conteudo += "<strong>Status do candidato alterado com sucesso!</strong>";
+                        conteudo += "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>";
+                        conteudo += "<span aria-hidden='true'>&times;</span>";
+                        conteudo += "</button>";
+                        conteudo += "</div>";
+                        $("#mensagemSucesso").html(conteudo);
+                    }
+
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+
+            });
+
+
+        }
+
+    }
+    </script>
+
+    <script>
+        function fecharModal() {
+            $('#loading').show();
+            var idCandidato = $("#idCandidatoModal").val();
+            $.ajax({
+                type: "POST",
+                url: "/app/candidato/obterdadoscandidato",
+                data: { "idCandidato": idCandidato },
+                success: function (result) {
+                    $("#loading").hide();
+                    var status = "";
+                    if (result.admitido == 1) {
+                        status = "<a href='#' class='badge badge-info'><i class='fa fa-check-circle'></i>&nbsp;Admitido</a>";
+                    }
+                    else {
+                        if (result.aprovado == 1 || result.aprovado == 2) {
+                            var aprovado = "<a href='#' class='badge badge-success'><i class='fa fa-check-circle'></i>&nbsp;Aprovado</a>";
+                            var reprovado = "<a href='#' class='badge badge-danger'><i class='fa fa-check'></i>&nbsp;Reprovado</a>";
+
+                            status = result.aprovado == 1 ? aprovado : reprovado;
+                        }
+                        else {
+                            var naoVerificado = "<a href='#' onclick=\"habilitarCandidatoView('" + idCandidato + "')\" class='badge badge-warning'><i class='fa fa-exclamation-circle'></i>&nbsp;Não verificado</a>";
+                            var habilitado = "<a href='#' class='badge badge-primary'><i class='fa fa-check-circle'></i>&nbsp;Habilitado</a>";
+
+                            status = result.status == "Não Verificado" ? naoVerificado : habilitado;
+                        }
+                    }
+
+
+                    $("#status" + idCandidato).html(status);
+
+                    var etapa = result.etapaAtual != null ? result.etapaAtual : "-";
+                    $("#etapa" + idCandidato).html(etapa);
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            })
+
+            $("#idCandidatoModal").val("");
+        }
+    </script>
+
+    <script>
+    var naoHabilitado = false;
+
+    function obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, id, vagas, vigencia) {
+
+        $("#idCandidatoModal").val(idCandidato);
+        $("#modal_titulo").html(titulo);
+        $("#modal_tipocontratacao").html(tipocontratacao);
+        $("#modal_localtrabalho").html(localtrabalho);
+        $("#modal_vagas").html(vagas);
+        $("#modal_vigencia").html(vigencia);
+
+        $("#foto_candidato").attr("src", "/images/users/avatar.png");
+        $("#nome_candidato").html("");
+        $("#email_candidato").html("");
+        $("#processo_candidato").html("");
+        $("#telefone_candidato").html("");
+        $("#dataVigenciaProcesso_candidato").html("");
+        $("#btnHabilitarCandidato").html("");
+        $("#btnAtualizarModal").html("");
+        $("#tabela2").hide();
+        $("#mensagem_vazio").html("");
+
+
+        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+        $("#loading").show();
+        $.ajax({
+            type: "POST",
+            url: '@Url.Content("~/app/candidato/obterdadoscandidato")',
+            data: { "idCandidato": idCandidato },
+            success: function (result) {
+                $("#loading").hide();
+                $("#foto_candidato").attr("src", "/candidatos/" + result.foto);
+                var nome = "<span style='font-size: 14pt; font-weight: 500'>" + result.nome + "</span>";
+                $("#nome_candidato").html(nome);
+
+                //var cpf = "<span style='font-weight: 500'>" + result.cpf + "</span>";
+                //$("#cpf_candidato").html(cpf);
+
+                var email = "<span>" + result.email + "</span>";
+                $("#email_candidato").html(email);
+
+                if (result.status == "Não Verificado") {
+
+                    var btnHabilitar = "<button class='badge badge-primary' onclick=\"habilitarCandidato(" + idCandidato + ", " + id + ")\" style='border: 0px; cursor: pointer;'><i class='fa fa-check-circle'></i>&nbsp;Habilitar</button>";
+                    $("#btnHabilitarCandidato").html(btnHabilitar);
+                    $("#mensagem_vazio").html("<i class='text-danger fa fa-exclamation-circle'></i>&nbsp;<strong>O candidato deve estar com status 'HABILITADO' para participar das etapas do processo seletivo.</strong>");
+                    naoHabilitado = true;
+                }
+
+                var processo = "<span>" + result.titulo + "</span>";
+                $("#processo_candidato").html(processo);
+
+                var telefone = "<a href='https://api.whatsapp.com/send?phone=55+" + result.celular + "' target='_blank' class='text-secondary' title='WhatsApp'><strong><i class='fab fa-whatsapp'></i></strong></a>&nbsp;&nbsp;" + result.celular;
+                $("#telefone_candidato").html(telefone);
+
+                var jsonProcesso = JSON.stringify(result);
+                console.log(jsonProcesso);
+                console.log(result.processoSeletivo);
+                $("#btnInfoProcessoCandidato").html("&nbsp;&nbsp;<button onclick=\"abrirModalProcessoSeletivo('" + id + "')\" class='badge badge-light' style='border: 0px; cursor: pointer;' title='Informações do processo seletivo.' data-target='#janelaprocessoseletivo' data-toggle='modal'><i class='fa fa-info-circle'></i></button>");
+
+
+
+                var data = "<span>" + vigencia + "</span>";
+                $("#dataVigenciaProcesso_candidato").html(data);
+
+
+                if (!naoHabilitado) {
+                    $("#tabela2").show();
+                    $("#conteudo_etapas").html("Carregando informações...");
+                    $.ajax({
+                        type: "POST",
+                        url: "/app/processoseletivo/obteretapascandidato",
+                        data: { "idProcessoSeletivo": id, "idCandidato": idCandidato },
+                        success: function (result) {
+                            var conteudo = "";
+
+                            for (var i = 0; i < result.length; i++) {
+                                conteudo += "<tr>";
+                                conteudo += "<td>" + result[i].titulo + "<br><small>Responsável: " + result[i].nome + "</small><br>";
+                                if (result[i].ultimaEtapaCandidato == 1) {
+                                    if (result[i].situacao == "Aprovado") {
+                                        conteudo += "<button onclick=\"desfazerAprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\" class='badge badge-warning btn-sm' style='border: 0px; cursor: pointer; margin-top: 5px;' title='Esta ação vai desfazer o status de aprovado do candidato no processo seletivo.'><i class='fa fa-times-circle'></i>&nbsp;CANCELAR APROVAÇÃO</button>&nbsp;";
+                                        conteudo += "</td>";
+                                        conteudo += "<td>" + result[i].dataRealizacao + "</td>";
+
+                                        if (result[i].observacoes.indexOf("\n") != -1) {
+                                            result[i].observacoes = result[i].observacoes.replace('\n', ' ');
+                                        }
+
+                                        conteudo += "<td><button onclick=\"abrirModalObservacoes('" + result[i].observacoes + "', '" + result[i].usuarioAlteracao + "', '" + result[i].nomeUsuario + "')\" class='badge badge-secondary' style='border: 0px; cursor: pointer;' data-target='#janelaObservacoes' data-toggle='modal'>Ver observações</button></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+
+                                            }
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td><span class='text-success'><i class='fa fa-check-circle'></i>&nbsp;Aprovado</span></td>";
+                                    }
+                                    if (result[i].situacao == "Reprovado") {
+                                        conteudo += "<button onclick=\"desfazerReprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\" class='badge badge-warning btn-sm' style='border: 0px; cursor: pointer; margin-top: 5px;' title='Esta ação vai desfazer o status de reprovado do candidato no processo seletivo.'><i class='fa fa-times-circle'></i>&nbsp;CANCELAR REPROVAÇÃO</button>&nbsp;";
+                                        conteudo += "</td>";
+                                        conteudo += "<td>" + result[i].dataRealizacao + "</td>";
+
+                                        if (result[i].observacoes.indexOf("\n") != -1) {
+                                            result[i].observacoes = result[i].observacoes.replace('\n', ' ');
+                                        }
+
+                                        conteudo += "<td><button onclick=\"abrirModalObservacoes('" + result[i].observacoes + "', '" + result[i].usuarioAlteracao + "', '" + result[i].nomeUsuario + "')\" class='badge badge-secondary' style='border: 0px; cursor: pointer;' data-target='#janelaObservacoes' data-toggle='modal'>Ver observações</button></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                            }
+
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td><span class='text-danger'><i class='fa fa-times-circle'></i>&nbsp;Reprovado</span></td>";
+                                    }
+                                }
+                                else {
+                                    if (result[i].situacao == "Aprovado") {
+                                        conteudo += "</td>";
+                                        conteudo += "<td>" + result[i].dataRealizacao + "</td>";
+
+                                        if (result[i].observacoes.indexOf("\n") != -1) {
+                                            result[i].observacoes = result[i].observacoes.replace('\n', ' ');
+                                        }
+
+                                        conteudo += "<td><button onclick=\"abrirModalObservacoes('" + result[i].observacoes + "', '" + result[i].usuarioAlteracao + "', '" + result[i].nomeUsuario + "')\" class='badge badge-secondary' style='border: 0px; cursor: pointer;' data-target='#janelaObservacoes' data-toggle='modal'>Ver observações</button></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                            }
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td><span class='text-success'><i class='fa fa-check-circle'></i>&nbsp;Aprovado</span></td>";
+                                    }
+                                    if (result[i].situacao == "Reprovado") {
+                                        conteudo += "</td>";
+                                        conteudo += "<td>" + result[i].dataRealizacao + "</td>";
+
+                                        if (result[i].observacoes.indexOf("\n") != -1) {
+                                            result[i].observacoes = result[i].observacoes.replace('\n', ' ');
+                                        }
+
+                                        conteudo += "<td><button onclick=\"abrirModalObservacoes('" + result[i].observacoes + "', '" + result[i].usuarioAlteracao + "', '" + result[i].nomeUsuario + "')\" class='badge badge-secondary' style='border: 0px; cursor: pointer;' data-target='#janelaObservacoes' data-toggle='modal'>Ver observações</button></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                            }
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td><span class='text-danger'><i class='fa fa-times-circle'></i>&nbsp;Reprovado</span></td>";
+
+
+                                    }
+                                    if (result[i].situacao == "Não realizado" && result[i].ordemEtapa == 1) {
+                                        conteudo += "<div style='margin-top: 5px;'>";
+                                        conteudo += "<button id='btnAbrirModalAprovacao' onclick =\"abrirModalAprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\"  class='badge badge-success btn-sm' style='border: 0px; cursor: pointer;' title='Aprovar candidato.' data-target='#janelaaprovacao' data-toggle='modal'><i class='fa fa-check-circle'></i>&nbsp;APROVAR</button>&nbsp;";
+                                        conteudo += "<button id='abrirModalReprovacao' onclick=\"abrirModalReprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\"  class='badge badge-danger btn-sm' style='border: 0px; cursor: pointer;' title='Reprovar candidato.' data-target='#janelareprovacao' data-toggle='modal'><i class='fa fa-times-circle'></i>&nbsp;REPROVAR</button>&nbsp;";
+                                        conteudo += "</div>";
+                                        conteudo += "</td>";
+                                        conteudo += "<td></td>";
+                                        conteudo += "<td></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                            }
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td></td>";
+
+                                    }
+                                    if (result[i].situacao == "Não realizado" && result[i].ordemEtapa != 1) {
+                                        conteudo += "<div style='margin-top: 5px;'>";
+                                        conteudo += "<button id='btnAbrirModalAprovacao' onclick =\"abrirModalAprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\"  class='badge badge-success btn-sm' style='border: 0px; cursor: pointer;' title='Aprovar candidato.' data-target='#janelaaprovacao' data-toggle='modal'><i class='fa fa-check-circle'></i>&nbsp;APROVAR</button>&nbsp;";
+                                        conteudo += "<button id='abrirModalReprovacao' onclick=\"abrirModalReprovacao('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\"  class='badge badge-danger btn-sm' style='border: 0px; cursor: pointer;' title='Reprovar candidato.' data-target='#janelareprovacao' data-toggle='modal'><i class='fa fa-times-circle'></i>&nbsp;REPROVAR</button>&nbsp;";
+                                        conteudo += "<button onclick=\"voltarEtapaCandidato('" + idCandidato + "','" + id + "', '" + result[i].idEtapa + "')\" class='badge badge-warning btn-sm' style='border: 0px; cursor: pointer;' title='Migrar candidato para a etapa anterior.'><i class='fa fa-arrow-circle-left'></i>&nbsp;VOLTAR</button>&nbsp;";
+                                        conteudo += "</div>";
+                                        conteudo += "</td>";
+                                        conteudo += "<td></td>";
+                                        conteudo += "<td></td>";
+                                        if (result[i].envioArquivos == 1) {
+                                            conteudo += `<td><a href='#' class='badge badge-primary' style='cursor: pointer;' onclick =\"abrirModalArquivosEtapa(${idCandidato},${id},${result[i].idEtapa},${null})\" data-target='#janelaArquivoEtapa' data-toggle='modal'><i class='fa fa-folder'></i>&nbsp;${result[i].envioArquivosPor == 2 ? 'Enviar Arquivos' : 'Visualizar Arquivos'}</a></td>`;
+                                        }
+                                        else if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                if (result[i].percentual != "0%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + result[i].percentual + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else if (result[i].percentual == "%") {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "0%" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                                else {
+                                                    conteudo += "<td width='140'><strong class='text-success' style='cursor: pointer;' title='Imprimir avaliação' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")'>" + "N/A" + "&nbsp;&nbsp;&nbsp;<i class='fa fa-file-pdf'></i></strong></td>";
+                                                }
+                                            }
+                                            else if (result[i].realizadoPor == 2) {
+                                                conteudo += "<td><span class='badge badge-primary' style='cursor: pointer;' onclick=\"executarAvaliacao('" + idCandidato + "', '" + id + "', '" + result[i].idEtapa + "', '" + result[i].idAvaliacao + "')\" title='Executar Avaliação'><i class='fa fa-pencil-alt'>&nbsp;&nbsp;</i>Executar Avaliação</span></td>";
+
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'><i class='fa fa-exclamation-triangle'>&nbsp;</i>Aguardando candidato</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }
+                                        conteudo += "<td></td>";
+                                    }
+                                    if (result[i].situacao != "Aprovado" && result[i].situacao != "Reprovado" && result[i].situacao != "Não realizado") {
+                                        conteudo += "</td>";
+                                        conteudo += "<td></td>";
+                                        conteudo += "<td></td>";
+                                        /*if (result[i].idAvaliacao != null) {
+                                            if (result[i].avaliacaoRealizada) {
+                                                conteudo += "<td width='140'><strong class='text-success'>" + result[i].percentual + "</strong>&nbsp;&nbsp;<a href='#' onclick='imprimirAvaliacao(" + result[i].idAvaliacaoPreenchidaCandidato + ")' class='badge badge-success'>IMPRIMIR</a></td>";
+                                            }
+                                            else {
+                                                conteudo += "<td><span class='text-warning'>Não Realizado</span></td>";
+                                            }
+                                        }
+                                        else {
+                                            conteudo += "<td></td>";
+                                        }*/
+                                        conteudo += "<td></td>";
+                                        conteudo += "<td></td>";
+                                    }
+                                }
+
+
+
+
+                                conteudo += "</tr>";
+                                $("#conteudo_etapas").html(conteudo);
+                                var botaoAtualizar = "<button class='btn btn-success' onclick=\"atualizarModal('" + idCandidato + "', '" + id + "')\" title='Atualizar'><i class='fa fa-redo'></i></button>";
+                                $("#btnAtualizarModal").html(botaoAtualizar);
+
+                            }
+
+                            //$("#conteudo_processo").html(conteudo);
+
+
+                            if (result.length == 0) {
+                                $("#conteudo_etapas").html("");
+                                $("#conteudo_processo").html("Não há etapas cadastradas para este processo seletivo");
+                            }
+                        },
+                        error: function (e) {
+                            console.log(e);
+                        }
+                    })
+                }
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        })
+
+
+        naoHabilitado = false;
+    }
+    </script>
+
+    <script>
+
+    function abrirModalArquivosEtapa(idCandidato, idProcessoSeletivo, idEtapa, mensagemAbertura) {
+        $("#idCandidatoModalArquivo").val(idCandidato);
+        $("#idProcessoSeletivoModalArquivo").val(idProcessoSeletivo);
+        $("#idEtapaModalArquivo").val(idEtapa);
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Content("~/app/etapas/obteretapa")',
+            data: { 'id': idEtapa },
+            success: function (result) {
+                if (result != "error") {
+                    if (result.envioArquivosPor == 1) {
+                        $("#conteudoFormularioEnvioArquivo").hide();
+                    }
+                }
+            }
+        })
+
+        if (mensagemAbertura != null) {
+            if (mensagemAbertura.split(",")[0] == "sucesso") {
+                $("#alertasModalArquivosCandidato").html(mensagemAbertura.split(",")[1]);
+                var conteudo = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <strong>${mensagemAbertura.split(",")[1]}</strong>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>`;
+                $("#alertasModalArquivosCandidato").html(conteudo);
+
+            }
+            else if (mensagemAbertura.split(",")[0] == "erro") {
+                var conteudo = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>${mensagemAbertura.split(",")[1]}</strong>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>`;
+                $("#alertasModalArquivosCandidato").html(conteudo);
+
+            }
+        }
+
+
+        setTimeout(function () {
+            $("#alertasModalArquivosCandidato").html("");
+
+        }, 10000);
+
+
+        var table = $("#tabela").DataTable();
+        $("#paginaAtiva").val(table.page.info().page);
+        //$("#tabelaArquivosCandidato").hide();
+        $("#loading").show();
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Content("~/app/candidato/obtertodosarquivoscandidato")',
+            data: { 'idCandidato': idCandidato, 'idProcessoSeletivo': idProcessoSeletivo, 'idEtapa': idEtapa },
+            success: function (result) {
+                if (result != "error") {
+                    if (result.length > 0) {
+                        var conteudo = ``;
+
+                        for (var i = 0; i < result.length; i++) {
+                            conteudo += `<tr>`;
+                            conteudo += `<td>${result[i].nomeArquivo}</td>`;
+                            conteudo += `<td>${formatarData(result[i].dataEnvio)}</td>`;
+                            conteudo += `<td>
+                                            <a href='${result[i].caminho}' target='_blank' class='badge badge-primary' style='cursor: pointer;'>Download</a>
+                                            <span onclick='excluirArquivoCandidato("${result[i].idArquivoCandidatoProcessoSeletivoEtapa}","${result[i].caminho}")'  class='badge badge-danger' style='cursor: pointer;'>Excluir</span>
+                                            </td>`;
+                            conteudo += `</tr>`;
+
+                        }
+
+                        $("#conteudoTabelaArquivosCandidato").html(conteudo);
+                        $("#tabelaArquivosCandidato").show();
+                    }
+                    else {
+                        $("#conteudoTabelaArquivosCandidato").html("<i class='fa fa-exclamation-circle'></i>&nbsp;<strong class='text-danger'>Não há arquivos.</strong>");
+                    }
+                }
+            },
+            error: function (e) {
+                console.log(e);
+            }
+        })
+        $("#loading").hide();
+    }
+
+
+    </script>
+
+    <script>
+        function enviarFormularioArquivo() {
+
+            if ($("[name=NomeArquivo]").val() == "" || $("[name=NomeArquivo]").val() == null) {
+                alert("Informe o nome do arquivo.");
+            }
+            else if ($("[name=arquivoEtapa]").val() == "") {
+                alert("Selecione o arquivo para envio.");
+            }
+            else {
+                $("#loading").show();
+                document.FormUploadArquivo.submit();
+            }
+
+        }
+    </script>
+
+    <script>
+
+    function excluirArquivoCandidato(idArquivo, caminhoArquivo) {
+        var idCandidato = $("#idCandidatoModalArquivo").val();
+        var idProcessoSeletivo = $("#idProcessoSeletivoModalArquivo").val();
+        var idEtapa = $("#idEtapaModalArquivo").val();
+
+        console.log(idCandidato);
+        console.log(idProcessoSeletivo);
+        console.log(idEtapa);
+        if (window.confirm("Deseja excluir esse arquivo?")) {
+            $("#loading").show();
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Content("~/app/candidato/excluirarquivocandidato")',
+                data: { 'idArquivo': idArquivo, 'caminhoArquivo': caminhoArquivo },
+                success: function (result) {
+                    if (result == "error") {
+                        var conteudo = `<div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <strong>Ocorreram erros ao excluir o arquivo.</strong>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>`;
+                        $("#alertasModalArquivosCandidato").html(conteudo);
+                        $("#loading").hide();
+                        abrirModalArquivosEtapa(idCandidato, idProcessoSeletivo, idEtapa, null);
+                    }
+                    if (result == "sucesso") {
+                        var conteudo = `<div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        <strong>Arquivo excluído com sucesso.</strong>
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>`;
+                        $("#alertasModalArquivosCandidato").html(conteudo);
+                        $("#loading").hide();
+                        setTimeout(function () {
+                            $("#alertasModalArquivosCandidato").html("");
+                        }, 5000)
+                        abrirModalArquivosEtapa(idCandidato, idProcessoSeletivo, idEtapa, null);
+                    }
+
+                },
+                error: function (e) {
+                    console.log(e);
+                    $("#loading").hide();
+                }
+            });
+        }
+
+    }
+    </script>
+
+    <script>
+        function atualizarModal(idCandidato, idProcessoSeletivo) {
+
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+
+            obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, idProcessoSeletivo, vagas, vigencia);
+
+        }
+    </script>
+
+    <script>
+        function executarAvaliacao(idCandidato, idProcessoSeletivo, idEtapa, idAvaliacao) {
+            $("#loading").show();
+            window.location = '/app/candidato/executaravaliacao?idCandidato=' + idCandidato + '&idProcessoSeletivo=' + idProcessoSeletivo + '&idEtapa=' + idEtapa + '&idAvaliacao=' + idAvaliacao;
+        }
+    </script>
+
+    <script>
+        function imprimirAvaliacao(id) {
+            window.open('/app/avaliacao/imprimiravaliacaocandidato/' + id, '_blank');
+        }
+    </script>
+
+    <script>
+        function abrirModalObservacoes(observacoes, usuario, nomeUsuario) {
+
+            var conteudo = "<hr/><p style='margin-bottom: -2px;'><strong>Realizado por:</strong><br>";
+            conteudo += nomeUsuario + "<br>";
+            conteudo += "<small>" + usuario + "</small><br><br>";
+            conteudo += "<strong>Observações:</strong><br> " + observacoes + "</p>";
+
+            $("#observacoes_candidato").html(conteudo);
+        }
+    </script>
+    <script>
+    function habilitarCandidato(idCandidato, idProcessoSeletivo) {
+
+        var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+        var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+        var titulo = document.getElementById("modal_titulo").innerHTML;
+        var vagas = document.getElementById("modal_vagas").innerHTML;
+        var vigencia = document.getElementById("modal_vigencia").innerHTML;
+
+        if (window.confirm('Deseja alterar o status deste candidato para "Habilitado" ?')) {
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Content("~/app/candidato/habilitarcandidato")',
+                data: { 'idCandidato': idCandidato },
+                success: function (result) {
+
+                    if (result == true) {
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, idProcessoSeletivo, vagas, vigencia);
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            });
+        }
+    }
+    </script>
+
+    <script>
+        function abrirModalAprovacao(idCandidato, idProcessoSeletivo, idEtapa) {
+
+
+            document.getElementById("idCandidatoAprovacao").value = idCandidato;
+            document.getElementById("idProcessoSeletivoAprovacao").value = idProcessoSeletivo;
+            document.getElementById("idEtapaAprovacao").value = idEtapa;
+
+            var botaoAprovacao = "<button  class='btn btn-success' onclick=\"aprovarCandidato()\"><i class='fa fa-check-circle'></i>&nbsp;Aprovar</button>&nbsp;";
+
+            $("#aprovacaoBotao").html(botaoAprovacao);
+        };
+    </script>
+
+    <script>
+        function abrirModalReprovacao(idCandidato, idProcessoSeletivo, idEtapa) {
+
+            document.getElementById("idCandidatoReprovacao").value = idCandidato;
+            document.getElementById("idProcessoSeletivoReprovacao").value = idProcessoSeletivo;
+            document.getElementById("idEtapaReprovacao").value = idEtapa;
+
+            var botaoReprovacao = "<button class='btn btn-danger' onclick=\"reprovarCandidato()\"><i class='fa fa-times-circle'></i>&nbsp;Reprovar</button>&nbsp;";
+            $("#reprovacaoBotao").html(botaoReprovacao);
+        };
+
+    </script>
+
+    <script>
+        function aprovarCandidato() {
+
+            var idCandidato = document.getElementById("idCandidatoAprovacao").value;
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+            var id = document.getElementById("idProcessoSeletivoAprovacao").value;
+
+            if (window.confirm('Esta ação irá Aprovar o candidato na etapa selecionada.\nDeseja continuar?')) {
+
+                $("#btnFecharModalAprovacao").click();
+                $('#loading').show();
+                $.ajax({
+                    type: "POST",
+                    url: "/app/processoseletivo/aprovarcandidato",
+                    data: { "idCandidato": document.getElementById("idCandidatoAprovacao").value, "idProcessoSeletivo": document.getElementById("idProcessoSeletivoAprovacao").value, "idEtapa": document.getElementById("idEtapaAprovacao").value, "observacoes": document.getElementById("observacoesAprovacao").value },
+                    success: function (result) {
+
+                        $('#loading').hide();
+
+                        var conteudo = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>" + result + "</strong><button type='button' id='btnFecharAlertaAprovacao' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+
+                        var interval = setInterval(() => {
+
+                        }, 1000);
+
+                        setTimeout(() => {
+
+                            $("#btnFecharAlertaAprovacao").click();
+                            clearInterval(interval);
+                        }, 5000);
+
+                        $("#resultadoetapas").html(conteudo);
+                        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+
+                        $("#observacoesAprovacao").val("");
+
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, id, vagas, vigencia);
+                    }
+                });
+            }
+
+        }
+
+        function reprovarCandidato() {
+
+            var idCandidato = document.getElementById("idCandidatoReprovacao").value;
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+            var id = document.getElementById("idProcessoSeletivoReprovacao").value;
+
+            if (window.confirm('Esta ação irá Reprovar o candidato na etapa selecionada.\nDeseja continuar?')) {
+
+                $("#btnFecharModalReprovacao").click();
+                $("#btnFecharModalCandidatos").click();
+                $('#loading').show();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/app/processoseletivo/reprovarcandidato",
+                    data: { "idCandidato": document.getElementById("idCandidatoReprovacao").value, "idProcessoSeletivo": document.getElementById("idProcessoSeletivoReprovacao").value, "idEtapa": document.getElementById("idEtapaReprovacao").value, "observacoes": document.getElementById("observacoesReprovacao").value },
+                    success: function (result) {
+                        var conteudo = "<div class='alert alert-danger alert-dismissible fade show' role='alert'><strong>" + result + "</strong><button type='button' id='btnFecharAlertaReprovacao' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+
+                        $('#loading').hide();
+
+                        var interval = setInterval(() => {
+
+                        }, 1000);
+
+                        setTimeout(() => {
+
+                            $("#btnFecharAlertaReprovacao").click();
+                            clearInterval(interval);
+                        }, 5000);
+
+                        $("#resultadoetapas").html(conteudo);
+
+                        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+
+                        $("#observacoesReprovacao").val("");
+
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, id, vagas, vigencia);
+
+                    }
+                });
+            }
+
+        }
+
+        function voltarEtapaCandidato(idCandidato, idProcessoSeletivo, idEtapa) {
+
+
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+
+
+            if (window.confirm('Esta ação irá migrar o candidato para a etapa anterior.\nDeseja continuar?')) {
+
+                $("#btnFecharModalCandidatos").click();
+                $('#loading').show();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/app/processoseletivo/voltaretapacandidato",
+                    data: { "idCandidato": idCandidato, "idProcessoSeletivo": idProcessoSeletivo, "idEtapa": idEtapa },
+                    success: function (result) {
+                        var conteudo = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>" + result + "</strong><button type='button' id='btnFecharAlertaMigracao' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+                        $('#loading').hide();
+
+                        var interval = setInterval(() => {
+
+                        }, 1000);
+
+                        setTimeout(() => {
+
+                            $("#btnFecharAlertaMigracao").click();
+                            clearInterval(interval);
+                        }, 5000);
+
+                        $("#resultadoetapas").html(conteudo);
+
+                        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, idProcessoSeletivo, vagas, vigencia);
+
+                    }
+                });
+            }
+
+        }
+
+        function desfazerAprovacao(idCandidato, idProcessoSeletivo, idEtapa) {
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+
+            if (window.confirm("Esta ação vai desfazer o status de aprovação do candidato.\nDeseja continuar?")) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/app/processoseletivo/desfazeraprovacaocandidato",
+                    data: { "idCandidato": idCandidato, "idProcessoSeletivo": idProcessoSeletivo, "idEtapa": idEtapa },
+                    success: function (result) {
+                        var conteudo = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>" + result + "</strong><button type='button' id='btnFecharAlertaMigracao' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+                        $('#loading').hide();
+
+                        var interval = setInterval(() => {
+
+                        }, 1000);
+
+                        setTimeout(() => {
+
+                            $("#btnFecharAlertaMigracao").click();
+                            clearInterval(interval);
+                        }, 5000);
+
+                        $("#resultadoetapas").html(conteudo);
+
+                        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, idProcessoSeletivo, vagas, vigencia);
+
+                    }
+                })
+            }
+        }
+
+        function desfazerReprovacao(idCandidato, idProcessoSeletivo, idEtapa) {
+            var tipocontratacao = document.getElementById("modal_tipocontratacao").innerHTML;
+            var localtrabalho = document.getElementById("modal_localtrabalho").innerHTML;
+            var titulo = document.getElementById("modal_titulo").innerHTML;
+            var vagas = document.getElementById("modal_vagas").innerHTML;
+            var vigencia = document.getElementById("modal_vigencia").innerHTML;
+
+            if (window.confirm("Esta ação vai desfazer o status de reprovação do candidato.\nDeseja continuar?")) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "/app/processoseletivo/desfazerreprovacaocandidato",
+                    data: { "idCandidato": idCandidato, "idProcessoSeletivo": idProcessoSeletivo, "idEtapa": idEtapa },
+                    success: function (result) {
+                        var conteudo = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>" + result + "</strong><button type='button' id='btnFecharAlertaMigracao' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button></div>";
+                        $('#loading').hide();
+
+                        var interval = setInterval(() => {
+
+                        }, 1000);
+
+                        setTimeout(() => {
+
+                            $("#btnFecharAlertaMigracao").click();
+                            clearInterval(interval);
+                        }, 5000);
+
+                        $("#resultadoetapas").html(conteudo);
+
+                        //$("#conteudo_processo").html("Carregando informações...<hr/>");
+
+                        obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, idProcessoSeletivo, vagas, vigencia);
+
+                    }
+                })
+            }
+        }
+    </script>
+
+    <script>
+
+    function formatarData(dateObject) {
+        var d = new Date(dateObject);
+        var day = d.getDate();
+        var month = d.getMonth() + 1;
+        var year = d.getFullYear();
+        if (day < 10) {
+            day = "0" + day;
+        }
+        if (month < 10) {
+            month = "0" + month;
+        }
+        var date = day + "/" + month + "/" + year;
+
+        return date;
+    };
+
+    function selecionarEmpresaConsulta() {
+
+        $("#dropProcessos").prop("disabled", true);
+        $("#dropProcessos").val(0);
+        $("#etapaProcesso").prop("disabled", true);
+        $("#etapaProcesso").val(0);
+
+        var idEmpresa = $("#IdEmpresa").val();
+        if (idEmpresa == "") {
+            $("#dropProcessos").prop("disabled", true);
+            $("#dropProcessos").val(0);
+            $("#etapaProcesso").prop("disabled", true);
+            $("#etapaProcesso").val(0);
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/app/candidato/obterprocessoseletivoempresa",
+                data: { "idEmpresa": idEmpresa },
+                success: function (result) {
+                    var conteudo = "<option value='0'>Selecione o Processo Seletivo</option>";
+                    conteudo += "<option value='-1'>Sem Processo Seletivo</option>";
+
+                    for (var i = 0; i < result.length; i++) {
+                        conteudo += "<option value='" + result[i].idProcessoSeletivo + "'>" + result[i].titulo + " (" + formatarData(result[i].dataInicio) + " a " + formatarData(result[i].dataTermino) + " - Vagas: " + result[i].numVagas + ")</option>";
+
+                    }
+
+                    $("#dropProcessos").html(conteudo);
+                    $("#dropProcessos").prop("disabled", false);
+                    $("#etapaProcesso").prop("disabled", true);
+                    $("#etapaProcesso").val(0);
+                    $("#IdEtapaProcesso").prop("disabled", false);
+                    $("#IdResponsavel").prop("disabled", false);
+                    $("#IdStatusProcesso").prop("disabled", false);
+
+                    if (result.length == 0) {
+                        var conteudo = "<option value='0'>Não há processo seletivo para a empresa selecionada</option>";
+
+                        $("#dropProcessos").html(conteudo);
+                        $("#dropProcessos").prop("disabled", true);
+                        $("#etapaProcesso").val(0);
+                        $("#IdEtapaProcesso").prop("disabled", true);
+                        $("#IdStatusProcesso").prop("disabled", true);
+                        $("#etapaProcesso").prop("disabled", true);
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+                }
+            })
+        }
+
+    }
+
+    function exbirCurriculo(model) {
+        console.log(model);
+        var candidato = JSON.parse(model);
+
+        $("#linkimpressao").attr('href', '/app/candidato/imprimir/' + candidato.IdCandidato);
+
+        $("#modal_nomecandidato").html(candidato.Nome);
+        $("#modal_fotocandidato").attr("src", "@Url.Content("~/candidatos/")" + candidato.Foto);
+        $("#modal_cpfcandidato").html("CPF: " + candidato.Cpf);
+        $("#modal_rg").html(candidato.Rg);
+        $("#modal_sexo").html(candidato.Sexo == 'F' ? "Feminino" : "Masculino");
+        $("#modal_datanascimento").html(formatarData(candidato.DataNascimento));
+        $("#modal_escolaridade").html(candidato.Escolaridade);
+
+        $("#modal_email").html(candidato.Email);
+        $("#modal_telefone").html(candidato.Telefone);
+        $("#modal_celular").html(candidato.Celular);
+        $("#modal_cep").html(candidato.Cep);
+        $("#modal_logradouro").html(candidato.Logradouro);
+        $("#modal_numero").html(candidato.Numero);
+        $("#modal_complemento").html(candidato.Complemento);
+        $("#modal_uf").html(candidato.Uf);
+        $("#modal_cidade").html(candidato.Cidade);
+        $("#modal_bairro").html(candidato.Bairro);
+        $("#modal_observacoes").html(candidato.Observacoes);
+
+
+
+        var myDate = '0001-01-01T00:00:00';
+
+        $.ajax({
+            type: "POST",
+            url: "/app/candidato/ObterDadosCandidato",
+            data: { idCandidato: candidato.IdCandidato },
+            success: function (result) {
+
+                var formacao = "";
+                for (var i = 0; i < result.formacao.length; i++) {
+
+                    formacao += "<div class='row'>";
+                    formacao += "<div class='col-md-4' style='font-weight: 500'>Descrição</div>";
+                    formacao += "<div class='col-md-8'><div>" + result.formacao[i].descricao + "</div></div>";
+                    formacao += "</div>";
+                    formacao += "<div class='row'>";
+
+                    formacao += "<div class='col-md-4' style='font-weight: 500'>Data de conclusão</div>";
+
+                    if (result.formacao[i].dataConclusao == myDate) {
+                        formacao += "<div class='col-md-8'><div>-</div></div>";
+                    }
+                    else {
+                        formacao += "<div class='col-md-8'><div>" + formatarData(result.formacao[i].dataConclusao) + "</div></div>";
+                    }
+
+                    formacao += "</div>";
+
+                    if ((i + 1) < result.formacao.length) {
+                        formacao += "<div style='margin-top: 10px;'></div>";
+                    }
+                }
+
+                $("#modal_formacao").html(formacao);
+
+                if (result.formacao.length == 0) {
+                    $("#modal_formacao").html("Não há.");
+                }
+
+                var experiencia = "";
+                for (var i = 0; i < result.experienciaProfissional.length; i++) {
+
+                    experiencia += "<div class='row'>";
+                    experiencia += "<div class='col-md-4' style='font-weight: 500'>Empresa</div>";
+                    experiencia += "<div class='col-md-8'><div>" + result.experienciaProfissional[i].empresa + "</div></div>";
+                    experiencia += "</div>";
+                    experiencia += "<div class='row'>";
+                    experiencia += "<div class='col-md-4' style='font-weight: 500'>Cargo</div>";
+                    experiencia += "<div class='col-md-8'><div>" + result.experienciaProfissional[i].cargo + "</div></div>";
+                    experiencia += "</div>";
+                    experiencia += "<div class='row'>";
+                    experiencia += "<div class='col-md-4' style='font-weight: 500'>Data de início</div>";
+                    experiencia += "<div class='col-md-8'><div>" + formatarData(result.experienciaProfissional[i].dataInicio) + "</div></div>";
+                    experiencia += "</div>";
+                    experiencia += "<div class='row'>";
+                    experiencia += "<div class='col-md-4' style='font-weight: 500'>Data de término</div>";
+
+                    if (result.experienciaProfissional[i].dataTermino == myDate) {
+
+                        experiencia += "<div class='col-md-8'><div>-</div></div>";
+                    }
+                    else {
+
+                        experiencia += "<div class='col-md-8'><div>" + formatarData(result.experienciaProfissional[i].dataTermino) + "</div></div>";
+                    }
+
+                    experiencia += "</div>";
+                    experiencia += "<div class='row'>";
+                    experiencia += "<div class='col-md-4' style='font-weight: 500'>Resumo</div>";
+                    experiencia += "<div class='col-md-8'><div>" + result.experienciaProfissional[i].resumoAtividades + "</div></div>";
+                    experiencia += "</div>";
+
+                    if ((i + 1) < result.experienciaProfissional.length) {
+                        experiencia += "<div style='margin-top: 10px;'></div>";
+                    }
+                }
+
+                $("#modal_experiencia").html(experiencia);
+
+                if (result.experienciaProfissional.length == 0) {
+                    $("#modal_experiencia").html("Não há.");
+                }
+            }
+        });
+    }
+
+    function contato(model) {
+        var candidato = JSON.parse(model);
+
+        $("#modal_nome").html(candidato.Nome);
+        $("#modal_foto").attr("src", "/candidatos/" + candidato.Foto);
+        $("#modal_cpf").html("CPF: " + candidato.Cpf);
+
+        $("#email").html(candidato.Email);
+        $("#telefone").html(candidato.Telefone);
+        $("#celular").html(candidato.Celular);
+        if (candidato.Linkedin == null) {
+
+            $("#linkedin").html("-");
+        }
+        else {
+            $("#linkedin").html(candidato.Linkedin);
+        }
+
+    }
+
+    function abrirModalAssociacao(idCandidato) {
+        $("#loading").show();
+        $("#idCandidatoAssociacao").val(idCandidato);
+        $("#dropProcessosAssociacao").prop("disabled", true);
+        $("#regionBtnSalvarAssociacao").html("<button id='btnSalvarAssociacao' onclick='salvarAssociacaoCandidato()' class='btn btn-success'><i class='fa fa-save'></i>&nbsp;Associar candidato</button>");
+        $("#btnSalvarAssociacao").prop("disabled", true);
+        $("#foto_candidatoAssociacao").attr("src", "/images/users/avatar.png");
+        $("#nome_candidatoAssociacao").html("");
+        $("#cpf_candidatoAssociacao").html("");
+        $("#email_candidatoAssociacao").html("");
+
+        var idEmpresa = 0;
+
+        $.ajax({
+            type: "POST",
+            url: "/app/candidato/obterdadoscandidato",
+            data: { idCandidato: idCandidato },
+            success: function (result) {
+                //$("#loading").hide();
+                $("#foto_candidatoAssociacao").attr("src", "/candidatos/" + result.foto);
+                $("#nome_candidatoAssociacao").html(result.nome);
+                $("#cpf_candidatoAssociacao").html(result.cpf);
+                $("#email_candidatoAssociacao").html(result.email);
+                idEmpresa = result.idEmpresa;
+
+                $.ajax({
+                    type: "POST",
+                    url: "/app/candidato/obtertodasempresas",
+                    success: function (result) {
+                        //$("#loading").hide();
+                        if (result.length > 0) {
+                            var conteudo = "<option value=''>Selecione a empresa</option>";
+                            conteudo += "<option value='0'>- TODAS AS EMPRESAS -</option>";
+                            for (var i = 0; i < result.length; i++) {
+
+                                if (idEmpresa == result[i].idEmpresa) {
+                                    conteudo += "<option value='" + result[i].idEmpresa + "' selected>" + result[i].nomeFantasia.toUpperCase() + "</option>";
+                                }
+                                else {
+                                    conteudo += "<option value='" + result[i].idEmpresa + "'>" + result[i].nomeFantasia.toUpperCase() + "</option>";
+
+                                }
+                            }
+
+                            $("#dropEmpresasAssociacao").html(conteudo);
+
+                            if (idEmpresa != 0) {
+                                $.ajax({
+                                    type: "POST",
+                                    url: "/app/candidato/obterprocessoseletivoempresa",
+                                    data: { idEmpresa: idEmpresa },
+                                    success: function (result) {
+                                        //$("#loading").hide();
+                                        if (result.length > 0) {
+                                            var conteudo = "<option value='0'>Selecione o processo</option>";
+                                            for (var i = 0; i < result.length; i++) {
+                                                conteudo += "<option value='" + result[i].idProcessoSeletivo + "'>" + result[i].titulo + "</option>";
+                                            }
+
+                                            $("#dropProcessosAssociacao").html(conteudo);
+                                            $("#dropProcessosAssociacao").prop("disabled", false);
+                                            $("#btnSalvarAssociacao").prop("disabled", true);
+
+
+                                        }
+                                        else {
+                                            $("#dropProcessosAssociacao").html("<option value='0'>Selecione o processo</option>");
+
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                $("#dropProcessosAssociacao").html("<option value='0'>Selecione o processo</option>");
+
+                            }
+                        }
+                    }
+
+                });
+                $("#loading").hide();
+
+            }
+        });
+
+    }
+
+    function obterProcessosModalAssociacao() {
+        $("#loading").show();
+        if ($("#dropEmpresasAssociacao").val() == "") {
+            $("#loading").hide();
+            $("#dropProcessosAssociacao").html("<option value='0'>Selecione o processo</option>");
+            $("#dropProcessosAssociacao").val(0);
+            $("#dropProcessosAssociacao").prop("disabled", true);
+            $("#btnSalvarAssociacao").prop("disabled", true);
+
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/app/candidato/obterprocessoseletivoempresa",
+                data: { idEmpresa: $("#dropEmpresasAssociacao").val() },
+                success: function (result) {
+                    $("#loading").hide();
+                    if (result.length > 0) {
+                        var conteudo = "<option value='0'>Selecione o processo</option>";
+                        for (var i = 0; i < result.length; i++) {
+                            conteudo += "<option value='" + result[i].idProcessoSeletivo + "'>" + result[i].titulo + "</option>";
+                        }
+
+                        $("#dropProcessosAssociacao").html(conteudo);
+                        $("#dropProcessosAssociacao").prop("disabled", false);
+                        $("#btnSalvarAssociacao").prop("disabled", true);
+
+
+                    }
+                    else {
+                        $("#dropProcessosAssociacao").html("<option value='0'>Selecione o processo</option>");
+                        $("#dropProcessosAssociacao").val(0);
+                        $("#dropProcessosAssociacao").prop("disabled", true);
+                        $("#btnSalvarAssociacao").prop("disabled", true);
+                    }
+                }
+            })
+        }
+
+    }
+
+    function habilitarDesabilitarBtnSalvarAssociacao() {
+
+        if ($("#dropProcessosAssociacao").val() == 0) {
+            $("#btnSalvarAssociacao").prop("disabled", true);
+        }
+        else {
+            $("#btnSalvarAssociacao").prop("disabled", false);
+        }
+    }
+
+    function salvarAssociacaoCandidato() {
+        $("#loading").show();
+        var idCandidato = $("#idCandidatoAssociacao").val();
+        var idEmpresa = $("#dropEmpresasAssociacao").val();
+        var idProcessoSeletivo = $("#dropProcessosAssociacao").val();
+
+        $.ajax({
+            type: "POST",
+            url: "/app/candidato/salvarassociacaocandidato",
+            data: { idCandidato: idCandidato, idEmpresa: idEmpresa, idProcessoSeletivo: idProcessoSeletivo },
+            success: function (result) {
+                console.log(result);
+                if (result != "error") {
+
+                    //$("#empresa" + idCandidato).html("");
+                    $("#empresa" + idCandidato).html(result.nomeFantasia);
+                    //$("#processoSeletivo" + idCandidato).html("");
+                    $("#processoSeletivo" + idCandidato).html(result.processoSeletivo.titulo);
+                    //$("#etapa" + idCandidato).html("");
+                    $("#etapa" + idCandidato).html(result.etapaAtual != null ? result.etapaAtual : "-");
+
+                    if (result.aprovado == 1 || result.aprovado == 2) {
+                        var aprovado = "<a href='#' class='badge badge-success'><i class='fa fa-check-circle'></i>&nbsp;Aprovado</a>";
+                        var reprovado = "<a href='#' class='badge badge-danger'><i class='fa fa-check'></i>&nbsp;Reprovado</a>";
+
+                        status = result.aprovado == 1 ? aprovado : reprovado;
+                    }
+                    else {
+                        var naoVerificado = "<a href='#' onclick=\"habilitarCandidatoView('" + idCandidato + "')\" class='badge badge-warning'><i class='fa fa-exclamation-circle'></i>&nbsp;Não verificado</a>";
+                        var habilitado = "<a href='#' class='badge badge-primary'><i class='fa fa-check-circle'></i>&nbsp;Habilitado</a>";
+
+                        status = result.status == "Não Verificado" ? naoVerificado : habilitado;
+                    }
+
+                    $("#status" + idCandidato).html(status);
+
+                    var tipocontratacao = result.processoSeletivo.tipoContratacao;
+                    var localTrabalho = result.processoSeletivo.cidade;
+                    var titulo = result.processoSeletivo.titulo;
+                    var vagas = result.processoSeletivo.numVagas;
+                    var vigencia = formatarData(result.processoSeletivo.dataInicio) + " a " + formatarData(result.processoSeletivo.dataTermino);
+
+                    idProcessoSeletivo = result.processoSeletivo.idProcessoSeletivo;
+
+                    //obterEtapas(idCandidato, tipocontratacao, localtrabalho, titulo, id, vagas, vigencia);
+
+                    var botaoGerenciar = "<button title='Etapas do Processo' id='btnModalEtapasAssociacao" + idCandidato + "'  onclick=\"obterEtapas('" + idCandidato + "', '" + tipocontratacao + "', '" + localTrabalho + "', '" + titulo + "', '" + idProcessoSeletivo + "', '" + vagas + "', '" + vigencia + "')\" class='badge badge-secondary' style='border: 0px; cursor: pointer;' data-target='#janelaetapas' data-toggle='modal'><i class='fa fa-business-time'></i>&nbsp;GERENCIAR</button>";
+
+                    $("#operacao" + idCandidato).html(botaoGerenciar);
+
+                    /*
+                    var conteudo = "";
+                    conteudo += "<div class='alert alert-success alert-dismissible fade show' role='alert'>";
+                    conteudo += "<strong>Candidato inscrito no processo seletivo com sucesso!</strong>";
+                    conteudo += "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>";
+                    conteudo += "<span aria-hidden='true'>&times;</span>";
+                    conteudo += "</button>";
+                    conteudo += "</div>";
+                    $("#mensagemSucesso").html(conteudo);*/
+                    $("#btnFecharModalAssociacao").click();
+                    $("#loading").hide();
+
+                    //$('html, body').animate({ scrollTop: 0 }, 'medium');
+
+
+                    $("#btnModalEtapasAssociacao" + idCandidato).click();
+                }
+                else if (result == "error") {
+                    var conteudo = "";
+                    conteudo += "<div class='alert alert-danger alert-dismissible fade show' role='alert'>";
+                    conteudo += "<strong>Ocorreram erros ao inscrever o candidato no processo seletivo.</strong>";
+                    conteudo += "<button type='button' class='close' data-dismiss='alert' aria-label='Close'>";
+                    conteudo += "<span aria-hidden='true'>&times;</span>";
+                    conteudo += "</button>";
+                    conteudo += "</div>";
+                    $("#mensagemSucesso").html(conteudo);
+                    $("#btnFecharModalAssociacao").click();
+                    $("#loading").hide();
+
+                    $('html, body').animate({ scrollTop: 0 }, 'medium');
+
+                }
+            }
+        });
+    }
+
+    function abrirModalProcessoSeletivo(idProcessoSeletivo) {
+
+        $("#loading").show();
+        $("#janelaProcessoSeletivo_titulo").html("");
+        $("#janelaProcessoSeletivo_tipoContratacao").html("");
+        $("#janelaProcessoSeletivo_localDeTrabalho").html("");
+        $("#janelaProcessoSeletivo_vigencia").html("");
+        $("#janelaProcessoSeletivo_descricao").html("");
+        $("#janelaProcessoSeletivo_exibirBeneficios").hide();
+        $("#janelaProcessoSeletivo_exibirRequisitos").hide();
+        $.ajax({
+            type: "GET",
+            url: "/app/candidato/obterprocessoseletivocandidato",
+            data: { idProcessoSeletivo: idProcessoSeletivo },
+            success: function (result) {
+                $("#loading").hide();
+                $("#janelaProcessoSeletivo_titulo").html(result.codigoVaga != null ? "<i class='fa fa-location-arrow'></i>&nbsp;" + result.titulo + " (" + result.codigoVaga + ")" : result.titulo);
+                $("#janelaProcessoSeletivo_tipoContratacao").html("<i class='fa fa-file'></i>&nbsp;" + result.tipoContratacao);
+                $("#janelaProcessoSeletivo_localDeTrabalho").html("<i class='fa fa-map-marker-alt'></i>&nbsp;" + result.cidade);
+                $("#janelaProcessoSeletivo_vigencia").html("<i class='fa fa-clock'></i>&nbsp;" + formatarData(result.dataInicio) + " a " + formatarData(result.dataTermino));
+                $("#janelaProcessoSeletivo_descricao").html(result.descricao);
+                if (result.beneficiosVaga.length > 0) {
+                    $("#janelaProcessoSeletivo_exibirBeneficios").show();
+                    var beneficios = "<ul>";
+                    for (var i = 0; i < result.beneficiosVaga.length; i++) {
+                        beneficios += "<li>" + result.beneficiosVaga[i].nome + "</li>";
+                    }
+                    beneficios += "</ul><br>";
+                    $("#janelaProcessoSeletivo_beneficios").html(beneficios);
+                }
+                else {
+                    $("#janelaProcessoSeletivo_exibirBeneficios").hide();
+
+                }
+
+                if (result.requisitos.length > 0) {
+                    $("#janelaProcessoSeletivo_exibirRequisitos").show();
+                    var requisitos = "<ul>";
+                    for (var i = 0; i < result.requisitos.length; i++) {
+                        requisitos += "<li>" + result.requisitos[i].descricao + "</li>";
+                    }
+                    requisitos += "</ul>";
+                    $("#janelaProcessoSeletivo_requisitos").html(requisitos);
+                }
+                else {
+                    $("#janelaProcessoSeletivo_exibirRequisitos").hide();
+                }
+            }
+        })
+
+    }
+
+    </script>
+
+}
+
+
+@section modals{
+    <div id="janelacurriculo" class="modal fade bd-example-modal-lg" tabindex="-1"
+         role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="margin-top: 30px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <img src="" id="modal_fotocandidato" onerror="this.src='/images/users/avatar.png'" style="width: 80px; border: 1px solid #3f6ad8;" />
+                        </div>
+                        <div class="col-md-9">
+                            <div id="modal_nomecandidato" style="font-size: 14pt; font-weight: 500;"></div>
+                            <div id="modal_cpfcandidato"></div>
+
+                            <a href="" id="linkimpressao" class="btn btn-secondary btn-sm" style="margin-top: 10px;">
+                                <i class="fa fa-print"></i>&nbsp;Imprimir currículo
+                            </a>
+                        </div>
+                    </div>
+                    <hr />
+                    <h6 style="font-size: 11pt; font-weight: 500;">DADOS CADASTRAIS</h6>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">RG</div>
+                        <div class="col-md-8"><div id="modal_rg"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Sexo</div>
+                        <div class="col-md-8"><div id="modal_sexo"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Data de Nasc</div>
+                        <div class="col-md-8"><div id="modal_datanascimento"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Escolaridade</div>
+                        <div class="col-md-8"><div id="modal_escolaridade"></div></div>
+                    </div>
+                    <br />
+                    <h6 style="font-size: 11pt; font-weight: 500;">INFORMAÇÕES DE CONTATO</h6>
+                    <div class="row">
+                        <div class="col-md-4" width="35%" style="font-weight: 500">Email</div>
+                        <div class="col-md-8"><div id="modal_email"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Telefone</div>
+                        <div class="col-md-8"><div id="modal_telefone"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Celular</div>
+                        <div class="col-md-8"><div id="modal_celular"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">CEP</div>
+                        <div class="col-md-8"><div id="modal_cep"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Endereço</div>
+                        <div class="col-md-8"><div id="modal_logradouro"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Número</div>
+                        <div class="col-md-8"><div id="modal_numero"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Complemento</div>
+                        <div class="col-md-8"><div id="modal_complemento"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">UF</div>
+                        <div class="col-md-8"><div id="modal_uf"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Cidade</div>
+                        <div class="col-md-8"><div id="modal_cidade"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Bairro</div>
+                        <div class="col-md-8"><div id="modal_bairro"></div></div>
+                    </div>
+                    <br />
+                    <h6 style="font-size: 11pt; font-weight: 500;">FORMAÇÃO ACADÊMICA</h6>
+                    <div id="modal_formacao"></div>
+                    <br />
+                    <h6 style="font-size: 11pt; font-weight: 500;">EXPERIÊNCIA PROFISSIONAL</h6>
+                    <div id="modal_experiencia"></div>
+                    <br />
+                    <h6 style="font-size: 11pt; font-weight: 500;">INFORMAÇÕES ADICIONAIS</h6>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Observações</div>
+                        <div class="col-md-8"><div id="modal_observacoes"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="contato" class="modal fade bd-example-modal-lg" tabindex="-1"
+         role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="margin-top: 200px;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <img src="" id="modal_foto" onerror="this.src='/images/users/avatar.png'" style="width: 80px; border: 1px solid #3f6ad8;" />
+                        </div>
+                        <div class="col-md-9">
+                            <div id="modal_nome" style="font-size: 14pt; font-weight: 500; margin-top: 25px;"></div>
+                            <div id="modal_cpf"></div>
+                        </div>
+                    </div>
+                    <hr />
+                    <h6 style="font-size: 11pt; font-weight: 500;">CONTATO</h6>
+                    <div class="row">
+                        <div class="col-md-4" width="35%" style="font-weight: 500;">Email</div>
+                        <div class="col-md-8"><div id="email"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500;">Telefone</div>
+                        <div class="col-md-8"><div id="telefone"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Celular</div>
+                        <div class="col-md-8"><div id="celular"></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4" style="font-weight: 500">Linkedin</div>
+                        <div class="col-md-8"><div id="linkedin"></div></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="janelaassociacao" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"
+         style="margin-top: 100px;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"><i class="fa fa-user text-primary"></i>&nbsp;Associação de Candidato</h5>
+                    <button type="button" id="btnFecharModalAssociacao" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" class="text-dark">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-2 text-left">
+                            <img src="" id="foto_candidatoAssociacao"
+                                 onerror="this.src='/images/users/avatar.png'"
+                                 style="height: 84px; border: 1px solid #3f6ad8;" />
+                        </div>
+
+                        <div class="col-md-10" style="margin-left: -40px;">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span id="nome_candidatoAssociacao" style="font-weight: 500; font-size: 13pt;"></span>
+                                    <div class="row">
+                                        <div class="col-md-3">
+
+                                            <i style="color: #b3c2ca; font-size: 9pt;" class="fa fa-address-card"></i>&nbsp;CPF:&emsp; <br />
+                                            <i style="color: #b3c2ca; font-size: 9pt;" class="fa fa-mail-bulk"></i>&nbsp;Email:&emsp;
+
+
+                                        </div>
+                                        <div class="col-md-9" style="margin-left: -30px;">
+                                            <span id="cpf_candidatoAssociacao"></span><br />
+                                            <span id="email_candidatoAssociacao"></span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <br />
+                    <h5 style="font-weight: 400" id="modaletapas_titulo">Selecione a empresa e o processo seletivo que deseja inscrever o candidato.</h5>
+                    <hr />
+                    <input type="hidden" name="idCandidatoAssociacao" id="idCandidatoAssociacao" value="">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label><i class="fa fa-building"></i>&nbsp;Empresa</label>
+                            <select class="form-control" name="idEmpresa" id="dropEmpresasAssociacao" onchange="obterProcessosModalAssociacao()">
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label><i class="fa fa-file-alt"></i>&nbsp;Processo Seletivo</label>
+                            <select class="form-control" name="idProcessoSeletivo" id="dropProcessosAssociacao" onchange="habilitarDesabilitarBtnSalvarAssociacao()">
+                            </select>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span id="regionBtnSalvarAssociacao">
+
+                            </span>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="janelaetapas" class="modal fade bd-example-modal-lg" tabindex="-1"
+         data-keyboard="false" data-backdrop="static"
+         role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle"><i class="fa fa-business-time text-primary"></i>&nbsp;Etapas do Processo</h5>
+                    <button type="button" onclick="fecharModal()" data-dismiss="modal" title="FECHAR JANELA" class="close" aria-label="Close">
+                        <span aria-hidden="true" class="text-dark">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="resultadoetapas">
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1">
+                            <img src="" id="foto_candidato"
+                                 onerror="this.src='/images/users/avatar.png'"
+                                 style="height: 84px; border: 1px solid #3f6ad8;" />
+                        </div>
+
+                        <div class="col-md-9">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span id="nome_candidato"></span>
+                                    <div class="row">
+                                        <div class="col-md-3">
+
+                                            <i style="color: #b3c2ca; font-size: 9pt;" class="fa fa-mail-bulk"></i>&nbsp;Email:&emsp; <br />
+                                            <i style="color: #b3c2ca; font-size: 9pt;" class="fa fa-file-alt"></i>&nbsp;Processo Seletivo:&emsp;
+
+
+
+                                        </div>
+                                        <div class="col-md-6">
+                                            <span id="email_candidato"></span><br />
+                                            <span id="processo_candidato"></span><span id="btnInfoProcessoCandidato"></span>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <span id="telefone_candidato"></span>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-2 text-right">
+                            <span id="btnHabilitarCandidato"></span>
+                            <span id="btnAtualizarModal"></span>
+                        </div>
+                    </div>
+                    <br />
+
+                    <h5 style="font-weight: 500; display: none;" id="modal_titulo"></h5>
+
+
+                    <div class="row" style="display: none">
+                        <div class="col-md-4">
+                            <p>
+                                Tipo de contratação: <span id="modal_tipocontratacao"></span>
+                                <br />
+                                Local de trabalho: <span id="modal_localtrabalho"></span>
+                            </p>
+                        </div>
+                        <div class="col-md-8">
+                            <p>
+                                Vagas: <span id="modal_vagas"></span>
+                                <br />
+                                Vigência: <span id="modal_vigencia"></span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <table class="mb-0 table table-hover" id="tabela2">
+                                <thead>
+                                    <tr>
+                                        <th width="280">Etapa</th>
+                                        <th>Data de Realização</th>
+                                        <th>Observações</th>
+                                        <th width="200">Ação</th>
+                                        <th>Status da Etapa</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="conteudo_etapas">
+                                </tbody>
+                            </table>
+
+                            <span id="mensagem_vazio"></span>
+                        </div>
+
+                    </div>
+                    <div id="conteudo_processo"></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+}

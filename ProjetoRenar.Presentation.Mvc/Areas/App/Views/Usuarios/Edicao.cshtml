@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Icon = "fa fa-user-plus";
+    ViewBag.Titulo = "Editar usuários";
+    ViewBag.Pagina = "Editar usuários";
+    ViewBag.Subtitulo = "Alterar usuários no sistema.";
+}
+
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@model ProjetoRenar.Application.ViewModels.Usuarios.EdicaoUsuarioViewModel
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-pencil-alt"></i>&nbsp;Edição de usuário</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm())
+            {
+                <div>
+                    @Html.HiddenFor(model => model.IdUsuario)
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label>Email do usuário:</label>
+                        @Html.TextBoxFor(model => model.EmailUsuario, new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.EmailUsuario)
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Perfil:</label>
+                        @Html.DropDownListFor(model => model.IDPerfil, Model.Perfis, "Escolha uma opção", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDPerfil)
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label>Loja:</label>
+                        @Html.DropDownListFor(model => model.IDUnidade, Model.Unidades, "Escolha uma opção", new { @class = "form-control" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.IDUnidade)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card para nova senha -->
+                <div class="card bg-light mb-3">
+                    <div class="card-header"><i class="fa fa-lock"></i>&nbsp;&nbsp;Alteração de Senha (Opcional)</div>
+                    <div class="card-body">
+                        <p class="text-muted">Se quiser alterar a senha do usuário, preencha o campo abaixo. Caso contrário, deixe em branco.</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Nova Senha:</label>
+                                @Html.PasswordFor(model => model.NovaSenha, new { @class = "form-control", placeholder = "Digite a nova senha" })
+                                <div class="text-danger">
+                                    @Html.ValidationMessageFor(model => model.NovaSenha)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-pencil-alt"></i> Atualizar dados
+                        </button>
+                        @if (Model.FlagAtivo)
+                        {
+                            <a href="/app/usuarios/inativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IdUsuario.ToString())"
+                               class="btn btn-danger" onclick="loading()">
+                                <i class="fa fa-trash-alt"></i> Inativar
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/app/usuarios/reativar/@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(Model.IdUsuario.ToString())" class="btn btn-info" onclick="loading()">
+                                <i class="fa fa-upload"></i> Reativar
+                            </a>
+                        }
+                        <a href="/app/usuarios/consulta" class="btn btn-light" onclick="loading()">
+                            <i class="fa fa-chevron-left"></i> Voltar
+                        </a>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

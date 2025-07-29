@@ -1,0 +1,144 @@
+﻿@model ProjetoRenar.Presentation.Mvc.Areas.App.Controllers.FiltrosViewModel
+
+@{
+    ViewBag.Icon = "fa fa-list";
+    ViewBag.Titulo = "Utilização e descarte";
+    ViewBag.Pagina = "Utilização e descarte";
+    ViewBag.Subtitulo = "Registrar utilização e descarte de produtos e preparações.";
+}
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+
+        <div class="card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <h4 style="margin-top: 10px;" class="card-title">
+                            <i class="fa fa-print"></i>&nbsp;Registrar utilização e descarte de produtos e preparações.
+                        </h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <!-- Formulário de filtros -->
+                <form method="get" class="row g-3 align-items-center mb-4 ml-4">
+
+                    <div class="col-auto">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.Produtos, new { @class = "form-check-input", id = "filtro-produtos" })
+                            <label class="form-check-label" for="filtro-produtos">Produtos</label>
+                        </div>
+                    </div>
+
+                    <div class="col-auto">
+                        <div class="form-check">
+                            @Html.CheckBoxFor(m => m.Preparacoes, new { @class = "form-check-input", id = "filtro-preparacoes" })
+                            <label class="form-check-label" for="filtro-preparacoes">Preparações</label>
+                        </div>
+                    </div>
+
+                    <div class="col-auto">
+                        <input type="text" name="Nome" class="form-control" placeholder="Nome" value="@Model.Nome" />
+                    </div>
+
+                    <div class="col-auto">
+                        <input type="date" name="DataInicio" class="form-control" value="@(Model.DataInicio?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+
+                    <div class="col-auto">
+                        <input type="date" name="DataFim" class="form-control" value="@(Model.DataFim?.ToString("yyyy-MM-dd") ?? "")" />
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary" onclick="loading()">Aplicar filtros</button>
+                    </div>
+                </form>
+
+                <!-- Resultado filtrado -->
+                <div class="row" id="board-produtos">
+                    @foreach (var item in Model.Etiquetas)
+                    {
+                        <div class="col-sm-4 item-card"
+                             data-id="@item.Id"
+                             data-flagproduto="@item.Etiqueta.FlagProduto"
+                             data-flagpreparacao="@item.Etiqueta.FlagPreparacao"
+                             data-impressao="@item.DataImpressao.ToString("yyyy-MM-dd")">
+
+                            <div class="card border" style="margin-bottom: 15px;">
+                                <div class="card-body" style="background-color: #fff; padding: 10px;">
+                                    <p style="font-size: 11px; color: #777; margin-bottom: 5px;">
+                                        Gerada em: @item.DataImpressao.ToString("dd/MM/yyyy HH:mm")
+                                    </p>
+
+                                    <h5><strong>@item.Etiqueta.NomeProduto</strong></h5>
+                                    <hr style="margin: 0px;" />
+                                    <table class="info-table" style="width: 100%; margin-bottom: 10px; margin-top: 5px;">
+                                        <tbody>
+                                            <tr>
+                                                <td><small><strong>Tipo:</strong></small></td>
+                                                <td><small>@item.Etiqueta.ModosConservacao.FirstOrDefault()</small></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small><strong>Data Fabricação:</strong></small></td>
+                                                <td><small>@item.Etiqueta.DataManipulacao</small></td>
+                                            </tr>
+                                            <tr>
+                                                <td><small><strong>Data Validade:</strong></small></td>
+                                                <td><small>@item.Etiqueta.DataValidade</small></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="d-flex justify-content-end gap-2" style="font-size: 13px; color: #555; margin-top: 10px;">
+                                        <a href="@Url.Action("DarBaixa", "ImpettusPrincipal", new { id = item.Id, area = "App" })"
+                                           class="btn btn-xs btn-outline-primary"
+                                           style="border: 1px solid #007bff; color: #007bff; background-color: transparent; padding: 3px 8px;"
+                                           onmouseover="this.style.backgroundColor='#007bff'; this.style.color='#fff';"
+                                           onmouseout="this.style.backgroundColor='transparent'; this.style.color='#007bff';"
+                                           onclick="return confirm('Tem certeza que deseja dar baixa neste item?');">
+                                            <i class="fa fa-download"></i> Dar Baixa
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section styles {
+    <style>
+        .item-card .card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 100%;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #board-produtos .item-card {
+            margin-bottom: 15px;
+        }
+    </style>
+}
+
+@section scripts {
+    <script>
+        function confirmarAcao(botao, acao, id) {
+            var texto = "Tem certeza que deseja " + acao + " este item?";
+            if (confirm(texto)) {
+                // Aqui pode fazer post AJAX para API futuramente
+                $(botao).closest('.item-card').fadeOut(300, function () {
+                    $(this).remove();
+                });
+            }
+        }
+    </script>
+}

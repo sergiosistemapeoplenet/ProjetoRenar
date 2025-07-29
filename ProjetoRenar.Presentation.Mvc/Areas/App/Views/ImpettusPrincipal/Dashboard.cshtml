@@ -1,0 +1,827 @@
+﻿@{
+    ViewBag.Icon = "fa fa-chart-pie";
+    ViewBag.Titulo = "Painel de controle";
+    ViewBag.Pagina = "Painel de controle";
+    ViewBag.Subtitulo = "Painel de controle.";
+}
+
+@model ProjetoRenar.Presentation.Mvc.Models.DashboardDatasViewModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+<div class="row" style="margin-top: -10px;">
+    <div class="col-md-12">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title">
+                <h4 style="margin-top: 10px;" class="card-title"><i class="fa fa-search-plus"></i>&nbsp;Relatórios de impressão de etiquetas</h4>
+            </div>
+        </div>
+        <div class="card card-body">
+
+            @using (Html.BeginForm("Dashboard", "Principal", FormMethod.Post))
+            {
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label>Data de início:</label>
+                        @Html.TextBoxFor(model => model.DataInicio, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.DataInicio)
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Data de fim:</label>
+                        @Html.TextBoxFor(model => model.DataFim, "{0:yyyy-MM-dd}", new { @class = "form-control", @type = "date" })
+                        <div class="text-danger">
+                            @Html.ValidationMessageFor(model => model.DataFim)
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-primary" style="margin-top: 30px;" onclick="loading()" type="submit">
+                            Filtrar
+                        </button>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <input type="checkbox" id="chk_geral" name="tipo" value="0" @(ViewBag.Tipo == "0" ? "checked" : "") /> Geral
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="checkbox" id="chk_regiao" name="tipo" value="1" @(ViewBag.Tipo == "1" ? "checked" : "") /> Região
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="checkbox" id="chk_unidade" name="tipo" value="2" @(ViewBag.Tipo == "2" ? "checked" : "") /> Unidade
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="checkbox" id="chk_tipodeproduto" name="tipo" value="3" @(ViewBag.Tipo == "3" ? "checked" : "") /> Tipo de produto
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="checkbox" id="chk_produto" name="tipo" value="4" @(ViewBag.Tipo == "4" ? "checked" : "") /> Produto
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @using ProjetoRenar.Domain.Contracts.Dtos
+
+            <div class="card" id="card_geral">
+                <div class="card-body">
+                    <div class="row">
+
+                        @{
+                            var dadosPeriodoGeral = (List<ConsultarQuantidadeImpressaoPeriodo_Geral>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_Geral;
+
+                        }
+
+                        <div class="col-md-4">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
+                            </div>
+
+                            @{
+                                var dadosAgrupadoMesGeral = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_geral>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Mês/Ano</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosAgrupadoMesGeral)
+                                        {
+                                            <tr>
+                                                <td>@item.MesAno</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td>
+                                            </td>
+                                            <td style="font-weight: 500;">
+                                                @dadosPeriodoGeral.FirstOrDefault().Quantidade
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                        <div class="col-md-8">
+                            <div id="grafico0"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="card_regiao">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                            </div>
+
+                            @{
+                                var dadosPeriodoRegiao = (List<ConsultarQuantidadeImpressaoPeriodo_Regiao>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_Regiao;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Região</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosPeriodoRegiao)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeRegiao</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td style="font-weight: 500;">@dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                        <div class="col-md-7">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
+                            </div>
+
+                            @{
+                                var dadosAgrupadoMesRegiao = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Região</th>
+                                            <th>Mês/Ano</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosAgrupadoMesRegiao)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeRegiao</td>
+                                                <td>@item.MesAno</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="grafico1"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card" id="card_unidade">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                            </div>
+
+                            @{
+                                var dadosPeriodoUnidade = (List<ConsultarQuantidadeImpressaoPeriodo_Unidade>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Unidade</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosPeriodoUnidade)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeUnidade</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                        <div class="col-md-7">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
+                            </div>
+
+                            @{
+                                var dadosAgrupadoMesUnidade = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Unidade</th>
+                                            <th>Mês/Ano</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosAgrupadoMesUnidade)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeUnidade</td>
+                                                <td>@item.MesAno</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="grafico2"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card" id="card_tipodeproduto">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                            </div>
+
+                            @{
+                                var dadosPeriodoTipoProduto = (List<ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo de produto</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosPeriodoTipoProduto)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeTipoProduto</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                        <div class="col-md-7">
+
+                            <div class="mb-3">
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
+                            </div>
+
+                            @{
+                                var dadosAgrupadoMesTipoProduto = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto;
+
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo de produto</th>
+                                            <th>Mês/Ano</th>
+                                            <th>Quantidade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in dadosAgrupadoMesTipoProduto)
+                                        {
+                                            <tr>
+                                                <td>@item.NomeTipoProduto</td>
+                                                <td>@item.MesAno</td>
+                                                <td>@item.Quantidade</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="grafico3"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card" id="card_produto">
+                <div class="card-body">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-5">
+
+                                <div class="mb-3">
+                                    <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                                </div>
+
+                                @{
+                                    var dadosPeriodoProduto = (List<ConsultarQuantidadeImpressaoPeriodo_Produto>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_Produto;
+
+                                    <table class="table table-sm table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Produto</th>
+                                                <th>Quantidade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in dadosPeriodoProduto)
+                                            {
+                                                <tr>
+                                                    <td>@item.NomeProduto</td>
+                                                    <td>@item.Quantidade</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td></td>
+                                                <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                }
+
+                            </div>
+
+                            <div class="col-md-7">
+
+                                <div class="mb-3">
+                                    <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
+                                </div>
+
+                                @{
+                                    var dadosAgrupadoMesProduto = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto;
+
+                                    <table class="table table-sm table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Produto</th>
+                                                <th>Mês/Ano</th>
+                                                <th>Quantidade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in dadosAgrupadoMesProduto)
+                                            {
+                                                <tr>
+                                                    <td>@item.NomeProduto</td>
+                                                    <td>@item.MesAno</td>
+                                                    <td>@item.Quantidade</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                }
+
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="grafico4"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            // Verifica qual checkbox está marcado ao carregar a página
+            $('input[type="checkbox"]').each(function () {
+                if ($(this).prop('checked')) {
+                    var checkboxID = $(this).attr('id');
+                    $('input[type="checkbox"]').not(this).prop('checked', false); // Desmarca os demais checkboxes
+                    $('div[id^="card_"]').hide(); // Esconde todos os cards
+                    $('#card_' + checkboxID.split('_')[1]).show(); // Exibe o card correspondente ao checkbox marcado
+                }
+            });
+
+            // Define o comportamento ao clicar nos checkboxes
+            $('input[type="checkbox"]').click(function () {
+                $('input[type="checkbox"]').not(this).prop('checked', false); // Desmarca os demais checkboxes
+                var checkboxID = $(this).attr('id');
+                $('div[id^="card_"]').hide(); // Esconde todos os cards
+                $('#card_' + checkboxID.split('_')[1]).show(); // Exibe o card correspondente ao checkbox clicado
+            });
+        });
+    </script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <script>
+        var dados0 = [];
+        var categories0 = [];
+    </script>
+
+    @foreach (var item in dadosAgrupadoMesGeral)
+    {
+        <script>
+            dados0.push(@item.Quantidade);
+            categories0.push(['@item.MesAno']);
+        </script>
+    }
+
+    <script>
+
+        var options0 = {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                categories: categories0
+            },
+            yAxis: {
+                title: {
+                    text: 'Quantidade de impressões'
+                }
+            },
+            series: [{
+                name: 'Mes/Ano',
+                data: dados0
+            }]
+        };
+
+        Highcharts.chart('grafico0', options0);
+    </script>
+
+    <script>
+        var dados1 = [];
+    </script>
+
+    @foreach (var item in dadosAgrupadoMesRegiao)
+    {
+        <script>
+            dados1.push(
+                { regiao: '@item.NomeRegiao', mesAno: '@item.MesAno', quantidade: @item.Quantidade }
+            );
+        </script>
+    }
+
+    <script>
+
+        var categorias1 = dados1.map(item => item.mesAno);
+        var regioes1 = Array.from(new Set(dados1.map(item => item.regiao)));
+        var series1 = regioes1.map(regiao => ({
+            name: regiao,
+            data: dados1.filter(item => item.regiao === regiao).map(item => item.quantidade)
+        }));
+
+        var options1 = {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: categorias1,
+                crosshair: true,
+                title: {
+                    text: 'Mês/Ano'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Quantidade'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:9px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: series1
+        };
+
+        Highcharts.chart('grafico1', options1);
+    </script>
+
+
+
+    <script>
+        var dados2 = [];
+    </script>
+
+    @foreach (var item in dadosAgrupadoMesUnidade)
+    {
+        <script>
+            dados2.push(
+                { unidade: '@item.NomeUnidade', mesAno: '@item.MesAno', quantidade: @item.Quantidade }
+            );
+        </script>
+    }
+
+    <script>
+
+        var categorias2 = dados2.map(item => item.mesAno);
+        var unidades2 = Array.from(new Set(dados2.map(item => item.unidade)));
+        var series2 = unidades2.map(unidade => ({
+            name: unidade,
+            data: dados2.filter(item => item.unidade === unidade).map(item => item.quantidade)
+        }));
+
+        var options2 = {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: categorias2,
+                crosshair: true,
+                title: {
+                    text: 'Mês/Ano'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Quantidade'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:9px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: series2
+        };
+
+        Highcharts.chart('grafico2', options2);
+    </script>
+
+    <script>
+        var dados3 = [];
+    </script>
+
+    @foreach (var item in dadosAgrupadoMesTipoProduto)
+    {
+        <script>
+            dados3.push(
+                { tipo: '@item.NomeTipoProduto', mesAno: '@item.MesAno', quantidade: @item.Quantidade }
+            );
+        </script>
+    }
+
+    <script>
+
+        var categorias3 = dados3.map(item => item.mesAno);
+        var tipos3 = Array.from(new Set(dados3.map(item => item.tipo)));
+        var series3 = tipos3.map(tipo => ({
+            name: tipo,
+            data: dados3.filter(item => item.tipo === tipo).map(item => item.quantidade)
+        }));
+
+        var options3 = {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: categorias3,
+                crosshair: true,
+                title: {
+                    text: 'Mês/Ano'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Quantidade'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:9px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: series3
+        };
+
+        Highcharts.chart('grafico3', options3);
+    </script>
+
+    <script>
+        var dados4 = [];
+    </script>
+
+    @foreach (var item in dadosAgrupadoMesProduto)
+    {
+        <script>
+            dados4.push(
+                { produto: '@item.NomeProduto', mesAno: '@item.MesAno', quantidade: @item.Quantidade }
+            );
+        </script>
+    }
+
+    <script>
+
+        var categorias4 = dados4.map(item => item.mesAno);
+        var produtos4 = Array.from(new Set(dados4.map(item => item.produto)));
+        var series4 = produtos4.map(produto => ({
+            name: produto,
+            data: dados4.filter(item => item.produto === produto).map(item => item.quantidade)
+        }));
+
+        var options4 = {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: categorias4,
+                crosshair: true,
+                title: {
+                    text: 'Mês/Ano'
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Quantidade'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:9px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: series4
+        };
+
+        Highcharts.chart('grafico4', options4);
+    </script>
+}
+
+
+@section styles {
+
+}
+
+@section modals {
+
+}

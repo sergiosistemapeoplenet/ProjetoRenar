@@ -51,7 +51,8 @@ namespace ProjetoRenar.Infra.Repository
                     ValidadeTemperaturaAmbiente,
                     IDGrupoPreparacao,
                     FlagAtivo,
-                    Sif
+                    Sif,
+                    FlagFavorito
                 )
                 VALUES (
                     @NomePreparacao,
@@ -65,7 +66,8 @@ namespace ProjetoRenar.Infra.Repository
                     @ValidadeTemperaturaAmbiente,
                     @IDGrupoPreparacao,
                     @FlagAtivo,
-                    @Sif
+                    @Sif,
+                    @FlagFavorito
                 )";
             _connection.Execute(sql, preparacao);
         }
@@ -86,7 +88,8 @@ namespace ProjetoRenar.Infra.Repository
                     ValidadeTemperaturaAmbiente = @ValidadeTemperaturaAmbiente,
                     IDGrupoPreparacao = @IDGrupoPreparacao,
                     FlagAtivo = @FlagAtivo,
-                    Sif = @Sif
+                    Sif = @Sif,
+                    FlagFavorito = @FlagFavorito
                 WHERE IDPreparacao = @IDPreparacao";
             _connection.Execute(sql, preparacao);
         }

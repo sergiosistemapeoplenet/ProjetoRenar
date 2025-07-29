@@ -20,5 +20,6 @@ namespace ProjetoRenar.Domain.Entities
         public string NomeGrupoPreparacao { get; set; }
         public bool FlagAtivo { get; set; }
         public string Sif { get; set; }
+        public int FlagFavorito { get; set; }
     }
 }

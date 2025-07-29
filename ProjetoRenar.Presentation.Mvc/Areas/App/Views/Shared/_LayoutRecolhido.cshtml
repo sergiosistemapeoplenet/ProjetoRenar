@@ -466,6 +466,25 @@
                                             </a>
                                         </li>
                                     </ul>
+                                    <ul class="mm-collapse">
+                                        <li>
+                                            <a onclick="loading()" href="/app/impettusprincipal/utilizacaodescarte" style="color: #90c0e2;">
+                                                <i class="fa fa-list"></i>
+                                                &nbsp;Utilização e descarte
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    @if (minhaConta.IDPerfil == 1)
+                                    {
+                                        <ul>
+                                            <li>
+                                                <a onclick="loading()" href="/app/impettusprincipal/dashboard" style="color: #90c0e2;">
+                                                    <i class="fa fa-chart-pie"></i>
+                                                    &nbsp;Painel de controle
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    }
                                 </li>
 
                                 @if (minhaConta.IDPerfil == 1)
@@ -510,6 +529,44 @@
                                                 <a onclick="loading()" href="/app/impettusgrupospreparacoes/consulta" style="color: #90c0e2;">
                                                     <i class="fa fa fa-list-alt"></i>
                                                     &nbsp;Grupos de preparações
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a href="#" class="app-sidebar__heading">
+                                            <i class="metismenu-icon fa fa-window-maximize"></i>
+                                            Lojas
+                                            <i style="font-size: 9pt;" class="metismenu-state-icon fa fa-chevron-down caret-left"></i>
+                                        </a>
+                                        <ul class="mm-collapse">
+                                            <li>
+                                                <a onclick="loading()" href="/app/unidades/consulta" style="color: #90c0e2;">
+                                                    <i class="fa fa-window-maximize"></i>
+                                                    &nbsp;Gerenciar lojas
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a onclick="loading()" href="/app/regioes/consulta" style="color: #90c0e2;">
+                                                    <i class="fa fa-globe"></i>
+                                                    &nbsp;Gerenciar regiões
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+
+                                    <li>
+                                        <a href="#" class="app-sidebar__heading">
+                                            <i class="metismenu-icon fa fa-user-plus"></i>
+                                            Usuários
+                                            <i style="font-size: 9pt;" class="metismenu-state-icon fa fa-chevron-down caret-left"></i>
+                                        </a>
+                                        <ul class="mm-collapse">
+                                            <li>
+                                                <a onclick="loading()" href="/app/usuarios/consulta" style="color: #90c0e2;">
+                                                    <i class="fa fa fa-user-plus"></i>
+                                                    &nbsp;Gerenciar usuários
                                                 </a>
                                             </li>
                                         </ul>

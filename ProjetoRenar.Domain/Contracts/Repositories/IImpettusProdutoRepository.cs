@@ -14,5 +14,17 @@ namespace ProjetoRenar.Domain.Contracts.Repositories
         void Update(ImpettusProduto produto);
         void Delete(int id);
         void UnDelete(int id);
+
+        void AdicionarControleEtiqueta(DateTime dataImpressao, string ConteudoEtiqueta);
+        void BaixarControleEtiqueta(int id);
+        List<ControleEtiqueta> ListarControleEtiqueta();
+    }
+
+    public class ControleEtiqueta
+    {
+        public int Id { get; set; }
+        public DateTime DataImpressao { get; set; }
+        public string ConteudoEtiqueta { get; set; }
+        public int FlagAtivo { get; set; }        
     }
 }

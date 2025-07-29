@@ -18,21 +18,32 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Models
         public bool CheckProdutos { get; set; } = true;
         public bool CheckPreparacoes { get; set; } = true;
 
-        public string Tipo { get; set; }
+        public bool CheckFavorito { get; set; } = false;
 
         public List<ImpettusProdutoModel> ListagemProdutos { get; set; }
-        public List<SelectListItem> ListagemTipos { get; set; }
     }
 
     public class ImpettusProdutoModel
     {
         public int IdProduto { get; set; }
-        public string NomeProduto { get; set; }
-        public string TipoProduto { get; set; }
-        public bool FlagProduto { get; set; }
-        public bool FlagPreparacao { get; set; }
-        public string DataAtual { get; set; } = string.Empty;
-        public string DataValidade { get; set; } = string.Empty;
+        public string NomeProduto { get; set; } = string.Empty;
+        public bool FlagResfriado { get; set; }
+        public string TipoValidadeResfriado { get; set; }
+        public int? ValidadeResfriado { get; set; }
+        public bool FlagCongelado { get; set; }
+        public int? ValidadeCongelado { get; set; }
+        public bool FlagTemperaturaAmbiente { get; set; }
+        public string TipoValidadeTemperaturaAmbiente { get; set; }
+        public int? ValidadeTemperaturaAmbiente { get; set; }
+        public int? IdGrupoProduto { get; set; }
+        public string NomeGrupoProduto { get; set; }
+        public bool FlagAtivo { get; set; }
+        public string Sif { get; set; }
+        public string DataValidadeCongelado { get; set; }
+        public string DataValidadeResfriado { get; set; }
+        public string DataValidadeTemperaturaAmbiente { get; set; }
         public string Tipo { get; set; }
+        public string PreparacaoProduto { get; set; }
+        public int FlagFavorito { get; set; }
     }
 }

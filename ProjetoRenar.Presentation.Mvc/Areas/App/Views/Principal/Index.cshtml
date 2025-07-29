@@ -26,6 +26,7 @@
         </div>
         <div class="card">
             <div class="card-body">
+
                 @using (Html.BeginForm("Index", "Principal", FormMethod.Post, new { @id = "FormProduto" }))
                 {
                     <div class="row">
@@ -123,37 +124,65 @@
 @section scripts {
 
     <script>
-        // Intercepta o envio do formulário
-        document.getElementById("FormularioImpressao").addEventListener("submit", function (event) {
-            // Impede o envio padrão do formulário
+                document.getElementById("FormularioImpressao").addEventListener("submit", function (event) {
             event.preventDefault();
 
-            // Cria um objeto FormData para enviar os dados do formulário
             var formData = new FormData(this);
-
-            // Faz uma requisição AJAX para o endpoint de impressão
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/app/principal/imprimir", true);
-            xhr.responseType = "blob"; // Espera uma resposta do tipo blob (para o PDF)
-            xhr.onload = function () {
-                if (this.status === 200) {
-                    // Cria uma URL temporária para o blob do PDF
-                    var url = window.URL.createObjectURL(this.response);
+            xhr.responseType = "blob";
 
-                    // Cria um iframe oculto para abrir o PDF e imprimir
-                    var iframe = document.createElement("iframe");
-                    iframe.style.display = "none";
-                    iframe.src = url;
-                    document.body.appendChild(iframe);
+            xhr.onloadend = function () {  // roda sempre que a requisição finaliza, sucesso ou erro
+                console.log("Status HTTP:", xhr.status);
+                var contentType = xhr.getResponseHeader("Content-Type");
+                console.log("Content-Type:", contentType);
 
-                    // Espera um pouco antes de imprimir
-                    setTimeout(function () {
-                        iframe.contentWindow.print();
-                    }, 1000); // Ajuste esse valor conforme necessário
+                if (xhr.status === 200) {                    
+                    if (contentType && contentType.indexOf("application/pdf") !== -1) {
+                        // PDF: imprimir
+                        var url = window.URL.createObjectURL(xhr.response);
+                        var iframe = document.createElement("iframe");
+                        iframe.style.display = "none";
+                        iframe.src = url;
+                        document.body.appendChild(iframe);
+                        setTimeout(function () {
+                            iframe.contentWindow.print();
+                        }, 1000);
+                    } else {
+                        // 200 mas não é PDF (provável JSON em blob)
+                        var reader = new FileReader();
+                        reader.onload = function () {
+                            try {
+                                var json = JSON.parse(reader.result);
+                                alert(json.mensagem || "Erro desconhecido.");
+                            } catch (e) {
+                                alert("Erro ao processar resposta JSON.");
+                            }
+                        };
+                        reader.readAsText(xhr.response);
+                    }
+                } else {
+                    // Status diferente de 200 - erro do servidor
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        try {
+                            var json = JSON.parse(reader.result);
+                            alert(json.mensagem || "Erro desconhecido no servidor.");
+                        } catch (e) {
+                            alert("Erro ao processar resposta JSON do servidor.");
+                        }
+                    };
+                    reader.readAsText(xhr.response);
                 }
             };
+
+            xhr.onerror = function () {
+                alert("Erro na comunicação com o servidor.");
+            };
+
             xhr.send(formData);
         });
+
     </script>
 
     <script>

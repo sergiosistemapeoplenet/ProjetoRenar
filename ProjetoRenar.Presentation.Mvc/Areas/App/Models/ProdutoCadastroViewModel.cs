@@ -35,5 +35,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Models
 
         public List<SelectListItem> Grupos { get; set; }
         public List<SelectListItem> Tipos { get; set; }
+
+        public int FlagFavorito { get; set; }
     }
 }

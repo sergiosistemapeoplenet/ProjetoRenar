@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using iText.Barcodes;
 using iText.IO.Image;
 using iText.Kernel.Colors;
@@ -14,8 +15,10 @@ using iText.Layout;
 using iText.Layout.Borders;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using Newtonsoft.Json;
 using ProjetoRenar.Application.ViewModels.Produtos;
 using ProjetoRenar.Application.ViewModels.Unidades;
+using ProjetoRenar.Domain.Contracts.Repositories;
 using ProjetoRenar.Domain.Entities;
 using ProjetoRenar.Presentation.Mvc.Areas.App.Controllers;
 using QRCoder;
@@ -24,17 +27,17 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
 {
     public class ImpettusEtiquetasReport
     {
-        public static byte[] ImprimirEtiqueta(List<ImpettusProdutoImpressaoModel> produtos)
+        public static byte[] ImprimirEtiqueta(List<ImpettusProdutoImpressaoModel> produtos, ConsultaUnidadeViewModel unidade, IUnitOfWork unitOfWork)
         {
             string outputFile = Guid.NewGuid() + ".pdf";
-            float width = MillimetersToPoints(65);
-            float height = MillimetersToPoints(65);
+            float width = MillimetersToPoints(60);
+            float height = MillimetersToPoints(60);
 
             PdfDocument pdfDoc = new PdfDocument(new PdfWriter(outputFile));
             Document document = new Document(pdfDoc, new PageSize(width, height));
 
-            document.SetMargins(5, 5, 5, 5); 
-            Imprimir(pdfDoc, document, width, produtos);
+            document.SetMargins(4, 2, 0, 6); 
+            Imprimir(pdfDoc, document, width, produtos, unidade, unitOfWork);
             document.Close();
 
             byte[] pdfBytes = System.IO.File.ReadAllBytes(outputFile);
@@ -43,7 +46,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             return pdfBytes;
         }
 
-        public static void Imprimir(PdfDocument pdf, Document document, float width, List<ImpettusProdutoImpressaoModel> produtos)
+        public static void Imprimir(PdfDocument pdf, Document document, float width, List<ImpettusProdutoImpressaoModel> produtos, ConsultaUnidadeViewModel unidade, IUnitOfWork unitOfWork)
         {
             for (int p = 0; p < produtos.Count; p++)
             {
@@ -51,19 +54,19 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 for (int i = 1; i <= item.QtdImpressoes; i++)
                 {
                     bool isNotLast = !(p == produtos.Count - 1 && i == item.QtdImpressoes);
-                    try { AddContent(pdf, document, width, item, isNotLast); } catch (Exception e) { }
+                    try { AddContent(pdf, document, width, item, isNotLast, unidade, unitOfWork); } catch (Exception e) { }
                 }
             }
         }
 
-        static void AddContent(PdfDocument pdf, Document document, float width, ImpettusProdutoImpressaoModel produto, bool quebraDePagina)
+        static void AddContent(PdfDocument pdf, Document document, float width, ImpettusProdutoImpressaoModel produto, bool quebraDePagina, ConsultaUnidadeViewModel unidade, IUnitOfWork unitOfWork)
         {
             string caminhoParaArial = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "Arial.ttf");
             var fonteArial = iText.Kernel.Font.PdfFontFactory.CreateFont(caminhoParaArial, "Identity-H", true);
 
             // Título
             document.Add(new Paragraph(produto.Nome.ToUpper())
-                .SetFont(fonteArial).SetFontSize(12).SetBold().SetTextAlignment(TextAlignment.LEFT).SetMultipliedLeading(0.9f).SetMarginBottom(0));
+                .SetFont(fonteArial).SetFontSize(11).SetBold().SetTextAlignment(TextAlignment.LEFT).SetMultipliedLeading(0.9f).SetMarginBottom(0));
 
             // Modo
             var modos = new List<string>();
@@ -73,89 +76,82 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             string modo = string.Join(" | ", modos);
 
             document.Add(new Paragraph(modo)
-                .SetFont(fonteArial).SetFontSize(7).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(1));
+                .SetFont(fonteArial).SetFontSize(8).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(1));
 
             var linha = new LineSeparator(new SolidLine(0.5f));
-            document.Add(linha.SetMarginBottom(4).SetMarginTop(2));
+            document.Add(linha.SetMarginBottom(2).SetMarginTop(2));
 
             if(produto.FlagResfriado)
             {
-                if(produto.TipoValidadeResfriado.Equals("D"))
+                if(produto.TipoValidadeResfriado != null && produto.TipoValidadeResfriado.Equals("D"))
                 {
-                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yy"))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yyyy"))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
 
-                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeResfriado.Value).ToString("dd/MM/yy")))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeResfriado.Value).ToString("dd/MM/yyyy")))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
                 }
-                else if(produto.TipoValidadeResfriado.Equals("H"))
+                else if(produto.TipoValidadeResfriado != null && produto.TipoValidadeResfriado.Equals("H"))
                 {
-                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yy - HH'H'mm"))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
 
-                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddHours(produto.ValidadeResfriado.Value).ToString("dd/MM/yy - HH'H'mm")))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddHours(produto.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm")))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
                 }
             }
             else if (produto.FlagCongelado)
             {
-                document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yy"))
-                       .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yyyy"))
+                       .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
 
-                document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeCongelado.Value).ToString("dd/MM/yy")))
-                    .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeCongelado.Value).ToString("dd/MM/yyyy")))
+                    .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
             }
             else if(produto.FlagTemperaturaAmbiente)
             {
-                if (produto.TipoValidadeResfriado.Equals("D"))
+                if (produto.TipoValidadeTemperaturaAmbiente != null && produto.TipoValidadeTemperaturaAmbiente.Equals("D"))
                 {
-                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yy"))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yyyy"))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
 
-                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy")))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddDays(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy")))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
                 }
-                else if (produto.TipoValidadeResfriado.Equals("H"))
+                else if (produto.TipoValidadeTemperaturaAmbiente != null && produto.TipoValidadeTemperaturaAmbiente.Equals("H"))
                 {
-                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yy - HH'H'mm"))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("MANIPULAÇÃO: \t\t" + DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(1).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
 
-                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddHours(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy - HH'H'mm")))
-                        .SetFont(fonteArial).SetFontSize(9).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
+                    document.Add(new Paragraph("VALIDADE: \t\t\t\t" + (DateTime.Now.AddHours(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm")))
+                        .SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginBottom(1).SetMarginTop(-2).SetPadding(0).SetTextAlignment(TextAlignment.LEFT));
                 }
             }            
                             
-            document.Add(linha.SetMarginBottom(4));
+            document.Add(linha.SetMarginBottom(2));
 
             // Demais informações
-            document.Add(new Paragraph("RESP: DANIEL").SetFont(fonteArial).SetFontSize(8).SetBold().SetMarginTop(1).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph("MANE NITERÓI").SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph("CNPJ: 44.021.725/0001-31").SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph("CEP: 24360-022 AVENIDA QUINTINO 185, NITERÓI RJ").SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"RESP: {unidade.NomeContato.ToUpper()}").SetFont(fonteArial).SetFontSize(7.5f).SetMargin(0).SetBold().SetMarginTop(1).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph(unidade.NomeUnidade.ToUpper()).SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"CNPJ: " + unidade.CNPJ).SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"CEP: {unidade.Cep} - {unidade.Endereco}").SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
 
             // … (seu conteúdo anterior permanece igual, mas remova o document.Add(barcodeImage); antes da parte que trata o barcode)
 
-            var code = Guid.NewGuid().ToString();
+            var code = produto.Id.ToString();
             var barcode = new iText.Barcodes.Barcode128(pdf);
             barcode.SetCode(code);
             barcode.SetCodeType(iText.Barcodes.Barcode128.CODE128);
             var barcodeXObject = barcode.CreateFormXObject(pdf);
             var barcodeImage = new iText.Layout.Element.Image(barcodeXObject)
-                .SetWidth(170)
-                .SetHeight(25);
-
-            // === Posicionar o barcode manualmente no fim da etiqueta ===
-            // Converta 6.5cm para pontos (72 pts por polegada; 1cm ≈ 28.35pt)
-            float etiquetaAltura = 6.5f * 28.35f;
-            float margemInferior = 10; // 10 pontos (~0.35 cm) da borda inferior
-            float margemEsquerda = (etiquetaAltura - 170) / 2; // centralizar horizontalmente
-            float yPosicao = margemInferior; // fixa a 10pt da borda inferior da página
+                .SetWidth(60)
+                .SetHeight(30);
 
             // Obtém o canvas da página atual
             PdfPage paginaAtual = pdf.GetLastPage();
             PdfCanvas pdfCanvas = new PdfCanvas(paginaAtual);
-            var canvas = new Canvas(pdfCanvas, new iText.Kernel.Geom.Rectangle(0, 0, etiquetaAltura, etiquetaAltura));
-            canvas.Add(barcodeImage.SetFixedPosition(margemEsquerda, yPosicao));
+            var canvas = new Canvas(pdfCanvas, new iText.Kernel.Geom.Rectangle(0, 0, 60, 60));
+            canvas.Add(barcodeImage.SetFixedPosition(55, 8));
             canvas.Close();
 
             // === Fim do barcode ===
@@ -164,7 +160,61 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             if (quebraDePagina)
                 document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
 
+            var etiqueta = new EtiquetaProdutoDTO
+            {
+                IdProduto = produto.Id,
+                NomeProduto = produto.Nome.ToUpper(),
+                FlagPreparacao = produto.FlagPreparacao,
+                FlagProduto = produto.FlagProduto,
+                ModosConservacao = new List<string>
+                {
+                    produto.FlagResfriado ? "RESFRIADO" : null,
+                    produto.FlagCongelado ? "CONGELADO" : null,
+                    produto.FlagTemperaturaAmbiente ? "TEMPERATURA AMBIENTE" : null
+                }.Where(x => x != null).ToList(),
+                            TipoValidade = produto.FlagResfriado ? produto.TipoValidadeResfriado :
+                               produto.FlagCongelado ? "D" :
+                               produto.TipoValidadeTemperaturaAmbiente,
+                            DataManipulacao = produto.TipoValidadeResfriado == "H" || produto.TipoValidadeTemperaturaAmbiente == "H"
+                    ? DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm")
+                    : DateTime.Now.ToString("dd/MM/yyyy"),
+                            DataValidade = produto.FlagResfriado && produto.TipoValidadeResfriado == "H"
+                    ? DateTime.Now.AddHours(produto.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm")
+                    : produto.FlagResfriado
+                        ? DateTime.Now.AddDays(produto.ValidadeResfriado.Value).ToString("dd/MM/yyyy")
+                    : produto.FlagCongelado
+                        ? DateTime.Now.AddDays(produto.ValidadeCongelado.Value).ToString("dd/MM/yyyy")
+                    : produto.TipoValidadeTemperaturaAmbiente == "H"
+                        ? DateTime.Now.AddHours(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm")
+                        : DateTime.Now.AddDays(produto.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy"),
+                            Responsavel = unidade.NomeContato.ToUpper(),
+                            NomeUnidade = unidade.NomeUnidade.ToUpper(),
+                            CNPJ = unidade.CNPJ,
+                            EnderecoCompleto = $"CEP: {unidade.Cep} - {unidade.Endereco}",
+                            CodigoBarras = produto.Id.ToString()
+                        };
+
+            var json = JsonConvert.SerializeObject(etiqueta);
+            unitOfWork.ImpettusProdutoRepository.AdicionarControleEtiqueta(DateTime.Now, json);
         }
+
+        public class EtiquetaProdutoDTO
+        {
+            public int IdProduto { get; set; }
+            public string NomeProduto { get; set; }
+            public List<string> ModosConservacao { get; set; } = new List<string>();
+            public string TipoValidade { get; set; } // "D" ou "H"
+            public string DataManipulacao { get; set; }
+            public string DataValidade { get; set; }
+            public string Responsavel { get; set; }
+            public string NomeUnidade { get; set; }
+            public string CNPJ { get; set; }
+            public string EnderecoCompleto { get; set; }
+            public string CodigoBarras { get; set; }
+            public bool FlagProduto { get; set; }
+            public bool FlagPreparacao { get; set; }
+        }
+
 
         static float MillimetersToPoints(float mm)
         {

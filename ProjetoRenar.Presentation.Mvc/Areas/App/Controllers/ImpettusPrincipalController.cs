@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ProjetoRenar.Application.Contracts;
@@ -10,12 +11,14 @@ using ProjetoRenar.Application.ViewModels.Usuarios;
 using ProjetoRenar.Domain.Contracts.Repositories;
 using ProjetoRenar.Domain.Entities;
 using ProjetoRenar.Presentation.Mvc.Areas.App.Models;
+using ProjetoRenar.Presentation.Mvc.Models;
 using ProjetoRenar.Presentation.Mvc.Reports;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using static ProjetoRenar.Presentation.Mvc.Reports.ImpettusEtiquetasReport;
 
 namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 {
@@ -34,23 +37,6 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
         {
             var model = new ImpettusImprimirEtiquetasViewModel();
 
-            model.ListagemTipos = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = "1",
-                Text = "Congelados"
-            });
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = "2",
-                Text = "Resfriados"
-            });
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = "3",
-                Text = "Temperatura ambiente"
-            });
-
             try
             {
                 var minhaContaUsuario = Newtonsoft.Json.JsonConvert.DeserializeObject<ProjetoRenar.Application.ViewModels.Usuarios.MinhaContaViewModel>(User.Identity.Name);
@@ -65,6 +51,47 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
             return View(model);
         }
+
+        public IActionResult UtilizacaoDescarte(FiltrosViewModel filtros)
+        {
+            var lista = _unitOfWork.ImpettusProdutoRepository.ListarControleEtiqueta();
+            var etiquetas = new List<ControleEtiquetaModel>();
+
+            foreach (var item in lista)
+            {
+                etiquetas.Add(new ControleEtiquetaModel
+                {
+                    DataImpressao = item.DataImpressao,
+                    Etiqueta = JsonConvert.DeserializeObject<EtiquetaProdutoDTO>(item.ConteudoEtiqueta),
+                    FlagAtivo = item.FlagAtivo,
+                    Id = item.Id
+                });
+            }
+
+            // Aplicar filtros no servidor
+            if (!string.IsNullOrWhiteSpace(filtros.Nome))
+            {
+                etiquetas = etiquetas
+                    .Where(e => e.Etiqueta.NomeProduto.ToLower().Contains(filtros.Nome.ToLower()))
+                    .ToList();
+            }
+
+            etiquetas = etiquetas
+                .Where(e => (filtros.Produtos && e.Etiqueta.FlagProduto) || (filtros.Preparacoes && e.Etiqueta.FlagPreparacao))
+                .ToList();
+
+            if (filtros.DataInicio.HasValue)
+                etiquetas = etiquetas.Where(e => e.DataImpressao.Date >= filtros.DataInicio.Value.Date).ToList();
+
+            if (filtros.DataFim.HasValue)
+                etiquetas = etiquetas.Where(e => e.DataImpressao.Date <= filtros.DataFim.Value.Date).ToList();
+
+            filtros.Etiquetas = etiquetas;
+
+            return View(filtros);
+        }
+
+
 
         private static string RemoverAcentos(string texto)
         {
@@ -90,6 +117,99 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
             {
                 model.ListagemProdutos = new List<ImpettusProdutoModel>();
 
+                var produtos = _unitOfWork.ImpettusProdutoRepository.GetAll();
+                var preparacoes = _unitOfWork.ImpettusPreparacaoRepository.GetAll();
+
+                if (!string.IsNullOrEmpty(model.NomeProduto))
+                {
+                    string nomeBusca = RemoverAcentos(model.NomeProduto).ToLower();
+
+                    produtos = produtos
+                        .Where(p => RemoverAcentos(p.NomeProduto).ToLower().Contains(nomeBusca))
+                        .ToList();
+
+                    preparacoes = preparacoes
+                        .Where(p => RemoverAcentos(p.NomePreparacao).ToLower().Contains(nomeBusca))
+                        .ToList();                    
+                }
+
+                if (model.CheckProdutos)
+                {
+                    foreach (var item in produtos)
+                    {
+                        model.ListagemProdutos.Add(new ImpettusProdutoModel
+                        {
+                            IdProduto = item.IdProduto,
+                            FlagAtivo = item.FlagAtivo,
+                            FlagCongelado = item.FlagCongelado,
+                            FlagResfriado = item.FlagResfriado,
+                            FlagTemperaturaAmbiente = item.FlagTemperaturaAmbiente,
+                            IdGrupoProduto = item.IdGrupoProduto,
+                            NomeGrupoProduto = _unitOfWork.ImpettusGruposProdutoRepository.GetById(item.IdGrupoProduto.Value).NomeGrupoProduto,
+                            NomeProduto = item.NomeProduto,
+                            Sif = item.Sif,
+                            TipoValidadeResfriado = item.TipoValidadeResfriado,
+                            TipoValidadeTemperaturaAmbiente = item.TipoValidadeTemperaturaAmbiente,
+                            ValidadeCongelado = item.ValidadeCongelado,
+                            ValidadeResfriado = item.ValidadeResfriado,
+                            ValidadeTemperaturaAmbiente = item.ValidadeTemperaturaAmbiente,
+                            PreparacaoProduto = "produto",
+                            FlagFavorito = item.FlagFavorito
+                        });
+                    }
+                }
+
+                if (model.CheckPreparacoes)
+                {
+                    foreach (var item in preparacoes)
+                    {
+                        model.ListagemProdutos.Add(new ImpettusProdutoModel
+                        {
+                            IdProduto = item.IdPreparacao,
+                            FlagAtivo = item.FlagAtivo,
+                            FlagCongelado = item.FlagCongelado,
+                            FlagResfriado = item.FlagResfriado,
+                            FlagTemperaturaAmbiente = item.FlagTemperaturaAmbiente,
+                            IdGrupoProduto = item.IdGrupoPreparacao,
+                            NomeGrupoProduto = _unitOfWork.ImpettusGruposPreparacoesRepository.GetById(item.IdGrupoPreparacao.Value).NomeGrupoPreparacao,
+                            NomeProduto = item.NomePreparacao,
+                            Sif = item.Sif,
+                            TipoValidadeResfriado = item.TipoValidadeResfriado,
+                            TipoValidadeTemperaturaAmbiente = item.TipoValidadeTemperaturaAmbiente,
+                            ValidadeCongelado = item.ValidadeCongelado,
+                            ValidadeResfriado = item.ValidadeResfriado,
+                            ValidadeTemperaturaAmbiente = item.ValidadeTemperaturaAmbiente,
+                            PreparacaoProduto = "preparacao",
+                            FlagFavorito = item.FlagFavorito
+                        });
+                    }
+                }
+
+                foreach (var item in model.ListagemProdutos)
+                {
+                    if(item.FlagCongelado)
+                    {
+                        item.DataValidadeCongelado = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yyyy");
+                    }
+                    if (item.FlagResfriado && item.TipoValidadeResfriado.Equals("D"))
+                    {
+                        item.DataValidadeResfriado = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy");
+                    }
+                    if (item.FlagResfriado && item.TipoValidadeResfriado.Equals("H"))
+                    {
+                        item.DataValidadeResfriado = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm");
+                    }
+                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente.Equals("D"))
+                    {
+                        item.DataValidadeTemperaturaAmbiente = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy");
+                    }
+                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente.Equals("H"))
+                    {
+                        item.DataValidadeTemperaturaAmbiente = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm");
+                    }
+                }
+
+                /*
                 if(!string.IsNullOrEmpty(model.Tipo))
                 {
                     var produtos = _unitOfWork.ImpettusProdutoRepository.GetAll();
@@ -120,8 +240,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                 model.ListagemProdutos.Add(new ImpettusProdutoModel
                                 {
                                     IdProduto = item.IdProduto,
-                                    DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                    DataValidade = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yy"),
+                                    DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                    DataValidade = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yyyy"),
                                     FlagPreparacao = false,
                                     FlagProduto = true,
                                     NomeProduto = item.NomeProduto,
@@ -138,8 +258,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                 model.ListagemProdutos.Add(new ImpettusProdutoModel
                                 {
                                     IdProduto = item.IdPreparacao,
-                                    DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                    DataValidade = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yy"),
+                                    DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                    DataValidade = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yyyy"),
                                     FlagPreparacao = true,
                                     FlagProduto = false,
                                     NomeProduto = item.NomePreparacao,
@@ -163,8 +283,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdProduto,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                        DataValidade = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yy"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                        DataValidade = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy"),
                                         FlagPreparacao = false,
                                         FlagProduto = true,
                                         NomeProduto = item.NomeProduto,
@@ -177,8 +297,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdProduto,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy - HH'H'mm"),
-                                        DataValidade = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yy - HH'H'mm"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"),
+                                        DataValidade = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm"),
                                         FlagPreparacao = false,
                                         FlagProduto = true,
                                         NomeProduto = item.NomeProduto,
@@ -198,8 +318,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdPreparacao,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                        DataValidade = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yy"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                        DataValidade = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy"),
                                         FlagPreparacao = true,
                                         FlagProduto = false,
                                         NomeProduto = item.NomePreparacao,
@@ -212,8 +332,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdPreparacao,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy - HH'H'mm"),
-                                        DataValidade = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yy - HH'H'mm"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"),
+                                        DataValidade = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm"),
                                         FlagPreparacao = true,
                                         FlagProduto = false,
                                         NomeProduto = item.NomePreparacao,
@@ -238,8 +358,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdProduto,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                        DataValidade = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                        DataValidade = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy"),
                                         FlagPreparacao = false,
                                         FlagProduto = true,
                                         NomeProduto = item.NomeProduto,
@@ -252,8 +372,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdProduto,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy - HH'H'mm"),
-                                        DataValidade = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy - HH'H'mm"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"),
+                                        DataValidade = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm"),
                                         FlagPreparacao = false,
                                         FlagProduto = true,
                                         NomeProduto = item.NomeProduto,
@@ -273,8 +393,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdPreparacao,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy"),
-                                        DataValidade = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy"),
+                                        DataValidade = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy"),
                                         FlagPreparacao = true,
                                         FlagProduto = false,
                                         NomeProduto = item.NomePreparacao,
@@ -287,8 +407,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                                     model.ListagemProdutos.Add(new ImpettusProdutoModel
                                     {
                                         IdProduto = item.IdPreparacao,
-                                        DataAtual = DateTime.Now.ToString("dd/MM/yy - HH'H'mm"),
-                                        DataValidade = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yy - HH'H'mm"),
+                                        DataAtual = DateTime.Now.ToString("dd/MM/yyyy - HH'H'mm"),
+                                        DataValidade = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm"),
                                         FlagPreparacao = true,
                                         FlagProduto = false,
                                         NomeProduto = item.NomePreparacao,
@@ -307,6 +427,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 {
                     TempData["MensagemAlerta"] = "Por favor, selecione um tipo (Resfriado, Congelado ou Temperatura Ambiente).";
                 }
+                */
             }
 
             model.ListagemProdutos = model.ListagemProdutos.OrderBy(p => p.NomeProduto).ToList();
@@ -320,33 +441,93 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 return RedirectToAction("index", "principal");
             }
 
-            model.ListagemTipos = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            if(model.CheckFavorito)
             {
-                Value = "1",
-                Text = "Congelados"
-            });
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = "2",
-                Text = "Resfriados"
-            });
-            model.ListagemTipos.Add(new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-            {
-                Value = "3",
-                Text = "Temperatura ambiente"
-            });
+                model.ListagemProdutos = model.ListagemProdutos.Where(p => p.FlagFavorito == 1).ToList();
+            }
 
             return View(model);
         }
 
+        public IActionResult DarBaixa(int id)
+        {
+            _unitOfWork.ImpettusProdutoRepository.BaixarControleEtiqueta(id);
+            TempData["MensagemSucesso"] = "Etiqueta baixada com sucesso!";
+            return RedirectToAction("UtilizacaoDescarte");
+        }
+
+
+        [Authorize(Roles = "Administrador")]
+        public IActionResult Dashboard()
+        {
+            var usuarioAutenticado = Newtonsoft.Json.JsonConvert.DeserializeObject<ProjetoRenar.Application.ViewModels.Usuarios.MinhaContaViewModel>(User.Identity.Name);
+            if (usuarioAutenticado != null && usuarioAutenticado.FlagPrimeiroAcesso != null && usuarioAutenticado.FlagPrimeiroAcesso.Value)
+                return RedirectToAction("RedefinirSenha", "Principal");
+
+            var dataAtual = DateTime.Now;
+
+            var model = new DashboardDatasViewModel
+            {
+                DataInicio = new DateTime(dataAtual.Year, dataAtual.Month, 1),
+                DataFim = new DateTime(dataAtual.Year, dataAtual.Month, 1).AddMonths(1).AddDays(-1)
+            };
+
+            ViewBag.Tipo = "0";
+
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Geral = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Geral(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Regiao = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Regiao(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Unidade(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Produto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Produto(model.DataInicio.Value, model.DataFim.Value);
+
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade = _unitOfWork.DashboardRepository.ConsuConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto(model.DataInicio.Value, model.DataFim.Value);
+
+            return View(model);
+        }
 
         [HttpPost]
-        public IActionResult Imprimir(string[] IdsProdutos, string[] QtdImpressoes, string tipo)
+        public IActionResult Dashboard(DashboardDatasViewModel model, string tipo)
+        {
+            ViewBag.Tipo = tipo;
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodo_Geral = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Geral(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodo_Regiao = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Regiao(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Unidade(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodo_Produto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Produto(model.DataInicio.Value, model.DataFim.Value);
+
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade = _unitOfWork.DashboardRepository.ConsuConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
+                    ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto = _unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto(model.DataInicio.Value, model.DataFim.Value);
+                }
+                catch (Exception e)
+                {
+                    TempData["MensagemErro"] = e.Message;
+                }
+            }
+
+            return View();
+        }
+
+
+        [HttpPost]
+        public IActionResult Imprimir(string[] IdsProdutos, string[] QtdImpressoes)
         {
             try
             {
                 var produtos = new List<ImpettusProdutoImpressaoModel>();
+                var produtosPreparacoes = new List<ProdutoPreparacao>();
+
                 for (int i = 0; i < IdsProdutos.Length; i++)
                 {
                     var tipoProduto = IdsProdutos[i].Split(";")[1];
@@ -356,10 +537,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                         var produto = _unitOfWork.ImpettusProdutoRepository.GetById(int.Parse(IdsProdutos[i].Split(";")[0]));
                         produtos.Add(new ImpettusProdutoImpressaoModel
                         {
-                            FlagAtivo = produto.FlagAtivo,
-                            FlagCongelado = tipo.Equals("1"),
-                            FlagResfriado = tipo.Equals("2"),
-                            FlagTemperaturaAmbiente = tipo.Equals("3"),
+                            FlagAtivo = produto.FlagAtivo,       
                             Id = produto.IdProduto,
                             IdGrupo = produto.IdGrupoProduto,
                             Nome = produto.NomeProduto,
@@ -370,7 +548,10 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             TipoValidadeTemperaturaAmbiente = produto.TipoValidadeTemperaturaAmbiente,
                             ValidadeCongelado = produto.ValidadeCongelado,
                             ValidadeResfriado = produto.ValidadeResfriado,
-                            ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente
+                            ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente,
+                            ProdutoPreparacao = "produto",
+                            FlagProduto = true,
+                            FlagPreparacao = false
                         });
                     }
                     else if(tipoProduto.Equals("2"))
@@ -379,9 +560,6 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                         produtos.Add(new ImpettusProdutoImpressaoModel
                         {
                             FlagAtivo = produto.FlagAtivo,
-                            FlagCongelado = tipo.Equals("1"),
-                            FlagResfriado = tipo.Equals("2"),
-                            FlagTemperaturaAmbiente = tipo.Equals("3"),
                             Id = produto.IdPreparacao,
                             IdGrupo = produto.IdGrupoPreparacao,
                             Nome = produto.NomePreparacao,
@@ -392,8 +570,32 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             TipoValidadeTemperaturaAmbiente = produto.TipoValidadeTemperaturaAmbiente,
                             ValidadeCongelado = produto.ValidadeCongelado,
                             ValidadeResfriado = produto.ValidadeResfriado,
-                            ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente
+                            ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente,
+                            ProdutoPreparacao = "preparacao",
+                            FlagProduto = false,
+                            FlagPreparacao = true
                         });
+                    }
+
+                    var form = Request.Form;
+
+                    var produtosSelecionados = form["IdsProdutos"];
+                    
+                    foreach (var idComSufixo in produtosSelecionados)
+                    {
+                        var idProdutoStr = idComSufixo.ToString().Split(';')[0];
+
+                        if (int.TryParse(idProdutoStr, out int idProduto))
+                        {
+                            var nomeCampoRadio = $"tipo{idProduto}";
+                            var tipoSelecionado = form[nomeCampoRadio];
+
+                            produtosPreparacoes.Add(new ProdutoPreparacao
+                            {
+                                ProdutoId = idProduto,
+                                TipoProdutoPreparacao = tipoSelecionado
+                            });
+                        }
                     }
 
                     try
@@ -406,24 +608,85 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                     }
                 }
 
+                foreach (var item in produtos)
+                {
+                    try
+                    {
+                        var itemProduto = produtosPreparacoes.FirstOrDefault(p => p.ProdutoId == item.Id && p.TipoProdutoPreparacao.Split(";")[1].Equals("produto"));
+                        var itemPreparacao = produtosPreparacoes.FirstOrDefault(p => p.ProdutoId == item.Id && p.TipoProdutoPreparacao.Split(";")[1].Equals("preparacao"));
+
+                        if (itemProduto != null)
+                        {
+                            if (itemProduto.TipoProdutoPreparacao.Split(";")[0].Equals("congelado")) item.FlagCongelado = true;
+                            if (itemProduto.TipoProdutoPreparacao.Split(";")[0].Equals("resfriado")) item.FlagResfriado = true;
+                            if (itemProduto.TipoProdutoPreparacao.Split(";")[0].Equals("temperaturaambiente")) item.FlagTemperaturaAmbiente = true;
+                        }
+
+                        if (itemPreparacao != null)
+                        {
+                            if (itemPreparacao.TipoProdutoPreparacao.Split(";")[0].Equals("congelado")) item.FlagCongelado = true;
+                            if (itemPreparacao.TipoProdutoPreparacao.Split(";")[0].Equals("resfriado")) item.FlagResfriado = true;
+                            if (itemPreparacao.TipoProdutoPreparacao.Split(";")[0].Equals("temperaturaambiente")) item.FlagTemperaturaAmbiente = true;
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        return StatusCode(500, new { mensagem = "Não foi possível gerar as etiquetas para impressão. Verifique se os itens estão selecionados corretamente." });
+                    }
+                }
+
                 byte[] pdfBytes = null;
 
                 if (produtos.Any())
                 {
+                    foreach (var item in produtos)
+                    {
+                        try
+                        {
+                            var minhaContaUsuario = Newtonsoft.Json.JsonConvert.DeserializeObject<MinhaContaViewModel>(User.Identity.Name);
+
+                            if (minhaContaUsuario.Unidades != null && minhaContaUsuario.Unidades.FirstOrDefault() != null)
+                            {
+                                _unitOfWork.ProdutoRepository.IncluirControleImpressao
+                                    (minhaContaUsuario.Unidades.FirstOrDefault().IDUnidade, item.Id, item.QtdImpressoes, minhaContaUsuario.IdUsuario);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+
+                        }
+                    }
+
                     var minhaConta = JsonConvert.DeserializeObject<MinhaContaViewModel>(User.Identity.Name);
-                    var unidade = minhaConta.Unidades.FirstOrDefault(u => u.FlagUnidadePadrao);                    
-                    pdfBytes = ImpettusEtiquetasReport.ImprimirEtiqueta(produtos);
+                    var unidade = minhaConta.Unidades.FirstOrDefault(u => u.FlagUnidadePadrao);
+                    
+                    if(unidade != null)
+                    {
+                        pdfBytes = ImpettusEtiquetasReport.ImprimirEtiqueta(produtos, unidade, _unitOfWork);
+                    }
+                    else if(minhaConta.Unidades != null && minhaConta.Unidades.Count > 0)
+                    {
+                        pdfBytes = ImpettusEtiquetasReport.ImprimirEtiqueta(produtos, minhaConta.Unidades[0], _unitOfWork);
+                    }
+                    else
+                    {
+                        return StatusCode(500, new { mensagem = "Não há uma loja configurada para este usuário." });
+                    }
                 }
 
                 return File(pdfBytes, "application/pdf", $"{Guid.NewGuid()}.pdf");
             }
             catch (Exception e)
             {
-                TempData["MensagemErro"] = e.Message;
+                return StatusCode(500, new { mensagem = "Não foi possível realizar a impressão" });
             }
-
-            return RedirectToAction("Index");
         }
+    }
+
+    public class ProdutoPreparacao
+    {
+        public int ProdutoId { get; set; }
+        public string TipoProdutoPreparacao { get; set; }
     }
 
     public class ImpettusProdutoImpressaoModel
@@ -443,5 +706,29 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
         public bool FlagAtivo { get; set; }
         public string Sif { get; set; }
         public int QtdImpressoes { get; set; }
+        public string ProdutoPreparacao { get; set; }
+        public bool FlagProduto { get; set; }
+        public bool FlagPreparacao{ get; set; }
     }
+
+    public class ControleEtiquetaModel
+    {
+        public int Id { get; set; }
+        public DateTime DataImpressao { get; set; }
+        public EtiquetaProdutoDTO Etiqueta { get; set; }
+        public int FlagAtivo { get; set; }
+    }
+
+    public class FiltrosViewModel
+    {
+        public bool Produtos { get; set; } = true;
+        public bool Preparacoes { get; set; } = true;
+
+        public string Nome { get; set; }
+        public DateTime? DataInicio { get; set; }
+        public DateTime? DataFim { get; set; }
+
+        public List<ControleEtiquetaModel> Etiquetas { get; set; } = new List<ControleEtiquetaModel>();
+    }
+
 }

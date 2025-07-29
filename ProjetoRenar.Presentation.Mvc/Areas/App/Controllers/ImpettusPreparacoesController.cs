@@ -101,7 +101,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                         TipoValidadeTemperaturaAmbiente = model.TipoValidadeTemperaturaAmbiente,
                         ValidadeCongelado = model.ValidadeCongelado,
                         ValidadeResfriado = model.ValidadeResfriado,
-                        ValidadeTemperaturaAmbiente = model.ValidadeTemperaturaAmbiente
+                        ValidadeTemperaturaAmbiente = model.ValidadeTemperaturaAmbiente,
+                        FlagFavorito = model.FlagFavorito,
                     });
 
                     ModelState.Clear();
@@ -153,7 +154,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 TipoValidadeTemperaturaAmbiente = dados.TipoValidadeTemperaturaAmbiente,
                 ValidadeCongelado = dados.ValidadeCongelado,
                 ValidadeResfriado = dados.ValidadeResfriado,
-                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente
+                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente,
+                FlagFavorito = dados.FlagFavorito
             };
 
             var grupos = _unitOfWork.ImpettusGruposPreparacoesRepository.GetAll().OrderBy(g => g.NomeGrupoPreparacao).ToList();
@@ -194,7 +196,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                         ValidadeCongelado = model.ValidadeCongelado,
                         ValidadeResfriado = model.ValidadeResfriado,
                         ValidadeTemperaturaAmbiente = model.ValidadeTemperaturaAmbiente,
-                        FlagAtivo = true
+                        FlagAtivo = true,
+                        FlagFavorito = model.FlagFavorito
                     });
 
                     TempData["MensagemSucesso"] = "Preparação atualizado com sucesso.";
@@ -241,7 +244,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 TipoValidadeTemperaturaAmbiente = dados.TipoValidadeTemperaturaAmbiente,
                 ValidadeCongelado = dados.ValidadeCongelado,
                 ValidadeResfriado = dados.ValidadeResfriado,
-                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente
+                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente,
+                FlagFavorito = dados.FlagFavorito
             };
 
             var grupos = _unitOfWork.ImpettusGruposPreparacoesRepository.GetAll().OrderBy(g => g.NomeGrupoPreparacao).ToList();
@@ -280,7 +284,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 TipoValidadeTemperaturaAmbiente = dados.TipoValidadeTemperaturaAmbiente,
                 ValidadeCongelado = dados.ValidadeCongelado,
                 ValidadeResfriado = dados.ValidadeResfriado,
-                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente
+                ValidadeTemperaturaAmbiente = dados.ValidadeTemperaturaAmbiente,
+                FlagFavorito = dados.FlagFavorito
             };
 
             var grupos = _unitOfWork.ImpettusGruposPreparacoesRepository.GetAll().OrderBy(g => g.NomeGrupoPreparacao).ToList();

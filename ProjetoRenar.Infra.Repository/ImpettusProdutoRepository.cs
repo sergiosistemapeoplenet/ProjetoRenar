@@ -51,7 +51,8 @@ namespace ProjetoRenar.Infra.Repository
                     ValidadeTemperaturaAmbiente,
                     IDGrupoProduto,
                     FlagAtivo,
-                    Sif
+                    Sif,
+                    FlagFavorito
                 )
                 VALUES (
                     @NomeProduto,
@@ -65,7 +66,8 @@ namespace ProjetoRenar.Infra.Repository
                     @ValidadeTemperaturaAmbiente,
                     @IDGrupoProduto,
                     @FlagAtivo,
-                    @Sif
+                    @Sif,
+                    @FlagFavorito
                 )";
             _connection.Execute(sql, produto);
         }
@@ -86,7 +88,8 @@ namespace ProjetoRenar.Infra.Repository
                     ValidadeTemperaturaAmbiente = @ValidadeTemperaturaAmbiente,
                     IDGrupoProduto = @IDGrupoProduto,
                     FlagAtivo = @FlagAtivo,
-                    Sif = @Sif
+                    Sif = @Sif,
+                    FlagFavorito = @FlagFavorito
                 WHERE IDProduto = @IDProduto";
             _connection.Execute(sql, produto);
         }
@@ -102,5 +105,32 @@ namespace ProjetoRenar.Infra.Repository
             var sql = "UPDATE Impettus.Produto SET FlagAtivo = 1 WHERE IDProduto = @IDProduto";
             _connection.Execute(sql, new { IDProduto = id });
         }
+
+        public void AdicionarControleEtiqueta(DateTime dataImpressao, string conteudoEtiqueta)
+        {
+            var sql = @"
+                INSERT INTO Impettus.ControleEtiqueta (ConteudoEtiqueta, DataImpressao)
+                VALUES (@ConteudoEtiqueta, @DataImpressao)";
+
+            _connection.Execute(sql, new
+            {
+                ConteudoEtiqueta = conteudoEtiqueta,
+                DataImpressao = dataImpressao
+            });
+        }
+
+
+        public void BaixarControleEtiqueta(int id)
+        {
+            var sql = "UPDATE Impettus.ControleEtiqueta SET FlagAtivo = 0 WHERE Id = @Id";
+            _connection.Execute(sql, new { Id = id });
+        }
+
+        public List<ControleEtiqueta> ListarControleEtiqueta()
+        {
+            var sql = "SELECT * FROM Impettus.ControleEtiqueta WHERE FlagAtivo = 1";
+            return _connection.Query<ControleEtiqueta>(sql).ToList();
+        }
+
     }
 }

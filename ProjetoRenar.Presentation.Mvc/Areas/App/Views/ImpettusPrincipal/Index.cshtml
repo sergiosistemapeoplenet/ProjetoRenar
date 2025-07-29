@@ -29,18 +29,15 @@
                 @using (Html.BeginForm("Index", "ImpettusPrincipal", FormMethod.Post, new { @id = "FormProduto" }))
                 {
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             @Html.TextBoxFor(model => model.NomeProduto, new { @style = "height: 34px!important;", @class = "form-control", @placeholder = "Digite o nome e pressione ENTER ou clique em 'Realizar Pesquisa'", @onchange = "submeterFormulario()" })
+                            <div class="mt-2 text-right">
+                                @Html.CheckBoxFor(model => model.CheckFavorito) Pesquisar apenas favoritos.
+                            </div>
                             <div class="text-danger">
                                 @Html.ValidationMessageFor(model => model.NomeProduto)
                             </div>
-                        </div>
-                        <div class="col-md-2">
-                            @Html.DropDownListFor(model => model.Tipo, Model.ListagemTipos, "Selecione o Tipo", new { @class = "form-control" })
-                            <div class="text-danger">
-                                @Html.ValidationMessageFor(model => model.Tipo)
-                            </div>
-                        </div>
+                        </div>                     
                         <div class="col-md-2">
                             <div style="margin-top: -2px;">
                                 @Html.CheckBoxFor(model => model.CheckProdutos) &nbsp; Produtos
@@ -51,7 +48,7 @@
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-lg btn-block" value="Pesquisar" onclick="loading()">
-                                <i class="fa fa-search"></i>&nbsp;Pesquisar
+                                <i class="fa fa-search"></i>&nbsp;Realizar Pesquisa
                             </button>
                         </div>
                     </div>
@@ -59,10 +56,6 @@
 
                 @using (Html.BeginForm("Imprimir", "ImpettusPrincipal", FormMethod.Post, new { @id = "FormularioImpressao" }))
                 {
-                    <div>
-                        @Html.HiddenFor(model => model.Tipo)
-                    </div>
-
                     <div class="row mt-3">
                         <div class="col-md-12">
                             @if (Model != null && Model.ListagemProdutos != null && Model.ListagemProdutos.Count > 0)
@@ -78,8 +71,11 @@
                                                         </th>
                                                         <th>Produto</th>
                                                         <th width="80" class="text-center">Qtd</th>
-                                                        <th width="160" class="text-center">Data de fabricação</th>
-                                                        <th width="160" class="text-center">Data de validade</th>
+                                                        <th class="text-center" width="140">Data/Hora</th>
+                                                        <th class="text-center">Congelado</th>
+                                                        <th class="text-center">Resfriado</th>
+                                                        <th class="text-center" width="140">Temp. Ambiente</th>
+                                                        <th class="text-center" width="140">Validade</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -87,24 +83,50 @@
                                                     {
                                                         <tr>
                                                             <td class="text-center">
-                                                                @if (item.FlagProduto)
+                                                                @if(item.PreparacaoProduto.Equals("produto"))
                                                                 {
                                                                     <input type="checkbox" name="IdsProdutos" value="@(item.IdProduto.ToString() + ";1")" style="width: 18px; height: 18px;" />
                                                                 }
-                                                                else if (item.FlagPreparacao)
+                                                                else
                                                                 {
                                                                     <input type="checkbox" name="IdsProdutos" value="@(item.IdProduto.ToString() + ";2")" style="width: 18px; height: 18px;" />
                                                                 }
                                                             </td>
-                                                            <td><span style="font-weight: 500">@item.NomeProduto.ToUpper()</span> (@item.TipoProduto)</td>
+                                                            <td><span style="font-weight: 500">@item.NomeProduto.ToUpper()</span> (@item.NomeGrupoProduto)</td>
                                                             <td>
                                                                 <input type="number" min="1" value="0" name="QtdImpressoes" class="form-control text-center" style="font-weight: 600;" />
                                                             </td>
-                                                            <td>
-                                                                <input type="text" readonly value="@item.DataAtual" style="font-weight: 600;" class="form-control text-center" />
+                                                            <td class="text-center">
+                                                                <small>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                @if (item.FlagCongelado)
+                                                                {
+                                                                    <input type="radio" data-tipo="congelado" name="tipo@(item.IdProduto)" value="congelado;@item.PreparacaoProduto" data-tipo="congelado" style="width: 18px; height: 18px;" />
+                                                                }
+                                                            </td>
+                                                            <td class="text-center">
+                                                                @if (item.FlagResfriado)
+                                                                {
+                                                                    <input type="radio" data-tipo="resfriado" name="tipo@(item.IdProduto)" value="resfriado;@item.PreparacaoProduto" data-tipo="resfriado" style="width: 18px; height: 18px;" />
+                                                                }
+                                                            </td>
+                                                            <td class="text-center">
+                                                                @if (item.FlagTemperaturaAmbiente)
+                                                                {
+                                                                    <input type="radio" data-tipo="temperaturaambiente" name="tipo@(item.IdProduto)" value="temperaturaambiente;@item.PreparacaoProduto" data-tipo="temperaturaambiente" style="width: 18px; height: 18px;" />
+                                                                }
                                                             </td>
                                                             <td>
-                                                                <input type="text" readonly value="@item.DataValidade" style="font-weight: 600;" class="form-control text-center" />
+                                                                <div id="congelado@(item.IdProduto)" class="text-center">
+                                                                    <small>@item.DataValidadeCongelado</small>
+                                                                </div>
+                                                                <div id="resfriado@(item.IdProduto)" class="text-center">
+                                                                    <small>@item.DataValidadeResfriado</small>
+                                                                </div>
+                                                                <div id="temperaturaambiente@(item.IdProduto)" class="text-center">
+                                                                    <small>@item.DataValidadeTemperaturaAmbiente</small>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     }
@@ -183,24 +205,35 @@
         $(document).ready(function () {
             // Quando o checkbox no cabeçalho é clicado
             $("th input[type='checkbox']").click(function () {
-                // Pega o estado (marcado ou não) do checkbox do cabeçalho
                 var isChecked = $(this).is(':checked');
 
-                // Percorre todos os checkboxes nas células (<td>) e os define com o mesmo estado do checkbox do cabeçalho
+                // Percorre todos os checkboxes nas linhas
                 $("tbody tr td input[type='checkbox']").each(function () {
-                    $(this).prop('checked', isChecked);
-                    var $this = $(this);
-                    // Encontra os campos de entrada na mesma linha do checkbox clicado
-                    var inputs = $this.closest('tr').find("input[type='number'], input[type='text']");
-                    // Habilita ou desabilita os campos baseado no estado do checkbox
-                    inputs.prop('disabled', !$this.is(':checked'));
-                    inputs.filter("input[type='number']").val($this.is(':checked') ? 1 : 0);
-                    // Adiciona ou remove a classe highlight baseado no estado do checkbox
-                    $this.closest('tr').toggleClass('highlight', $this.is(':checked'));
+                    var $checkbox = $(this);
+                    $checkbox.prop('checked', isChecked);
+
+                    var $row = $checkbox.closest('tr');
+                    // Habilita ou desabilita campos da linha
+                    $row.find("input[type='number'], input[type='text'], input[type='radio']")
+                        .prop('disabled', !isChecked);
+
+                    // Define valor padrão no campo de quantidade
+                    $row.find("input[type='number']").val(isChecked ? 1 : 0);
+
+                    // Marca visual da linha
+                    $row.toggleClass('highlight', isChecked);
+
+                    // Limpa radios e oculta validade se desmarcado
+                    if (!isChecked) {
+                        $row.find("input[type='radio']").prop('checked', false);
+                        const produtoId = $checkbox.val().split(';')[0];
+                        $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
+                    }
                 });
             });
         });
     </script>
+
     <script>
         $(document).ready(function () {
             // Desabilita inicialmente todos os campos
@@ -234,12 +267,61 @@
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function () {
+            // Oculta todas as datas de validade ao carregar a página
+            $("div[id^='congelado'], div[id^='resfriado'], div[id^='temperaturaambiente']").hide();
+
+            // Desabilita todos os campos inicialmente
+            $("tbody tr").each(function () {
+                $(this).find("input[type='number'], input[type='text'], input[type='radio']").prop('disabled', true);
+            });
+
+            // Checkbox individual de linha
+            $("tbody tr td input[type='checkbox']").click(function () {
+                var $checkbox = $(this);
+                var $row = $checkbox.closest('tr');
+                var isChecked = $checkbox.is(':checked');
+
+                // Habilita/desabilita campos da linha
+                $row.find("input[type='number'], input[type='text'], input[type='radio']")
+                    .prop('disabled', !isChecked);
+
+                // Atualiza valor do campo de número
+                $row.find("input[type='number']").val(isChecked ? 1 : 0);
+
+                // Marca visual
+                $row.toggleClass('highlight', isChecked);
+
+                // Limpa seleção e validade se desmarcado
+                if (!isChecked) {
+                    $row.find("input[type='radio']").prop('checked', false);
+                    const produtoId = $checkbox.val().split(';')[0];
+                    $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
+                }
+            });
+
+            // Quando um radio for marcado, exibe a data correspondente
+            $("input[type='radio'][name^='tipo']").on("change", function () {
+                const tipo = $(this).data("tipo"); // congelado, resfriado, temperaturaambiente
+                const produtoId = $(this).attr("name").replace("tipo", "");
+
+                // Oculta todas as validades do produto
+                $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
+
+                // Exibe a validade correspondente
+                $(`#${tipo}${produtoId}`).show();
+            });
+        });
+    </script>
+
 }
 
 @section styles {
     <style>
         .highlight {
-            background-color: #007bff;
+            background-color: #999;
             color: #fff;
             font-weight: bold;
         }

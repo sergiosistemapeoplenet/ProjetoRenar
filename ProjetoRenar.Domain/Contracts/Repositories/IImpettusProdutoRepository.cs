@@ -18,6 +18,8 @@ namespace ProjetoRenar.Domain.Contracts.Repositories
         void AdicionarControleEtiqueta(DateTime dataImpressao, string ConteudoEtiqueta);
         void BaixarControleEtiqueta(int id);
         List<ControleEtiqueta> ListarControleEtiqueta();
+
+        void IncluirControleImpressao(int idUnidade, int idProduto, int idPreparacao, int quantidadeEtiqueta, int idUsuario);
     }
 
     public class ControleEtiqueta

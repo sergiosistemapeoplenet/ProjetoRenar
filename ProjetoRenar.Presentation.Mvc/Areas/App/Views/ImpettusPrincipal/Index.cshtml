@@ -69,13 +69,16 @@
                                                         <th class="text-center" width="60">
                                                             <input type="checkbox" style="width: 18px; height: 18px;" />
                                                         </th>
-                                                        <th>Produto</th>
-                                                        <th width="80" class="text-center">Qtd</th>
-                                                        <th class="text-center" width="140">Data/Hora</th>
-                                                        <th class="text-center">Congelado</th>
-                                                        <th class="text-center">Resfriado</th>
-                                                        <th class="text-center" width="140">Temp. Ambiente</th>
-                                                        <th class="text-center" width="140">Validade</th>
+                                                        <th style="font-size: 10pt;">Produto</th>
+                                                        <th width="70" class="text-center" style="font-size: 10pt;">Qtd</th>
+                                                        <th class="text-center" style="font-size: 10pt;">Data/Hora</th>
+                                                        <th class="text-center" style="font-size: 10pt;">Congelado</th>
+                                                        <th class="text-center" style="font-size: 10pt;">Resfriado</th>
+                                                        <th class="text-center" style="font-size: 10pt;" width="100">T. Ambiente</th>
+                                                        <th class="text-center" style="font-size: 10pt;" width="120">Validade</th>
+                                                        <th class="text-center" style="font-size: 10pt;" width="120">SIF</th>
+                                                        <th class="text-center" style="font-size: 10pt;" width="120">Lote</th>
+                                                        <th class="text-center" style="font-size: 10pt;" width="120">Quantidade</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -92,12 +95,13 @@
                                                                     <input type="checkbox" name="IdsProdutos" value="@(item.IdProduto.ToString() + ";2")" style="width: 18px; height: 18px;" />
                                                                 }
                                                             </td>
-                                                            <td><span style="font-weight: 500">@item.NomeProduto.ToUpper()</span> (@item.NomeGrupoProduto)</td>
+                                                            <td><div style="font-weight: 500" style="font-size: 11pt;">@item.NomeProduto.ToUpper()</div> <small>@item.NomeGrupoProduto</small></td>
                                                             <td>
                                                                 <input type="number" min="1" value="0" name="QtdImpressoes" class="form-control text-center" style="font-weight: 600;" />
                                                             </td>
                                                             <td class="text-center">
-                                                                <small>@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+                                                                <div><small>@DateTime.Now.ToString("dd/MM/yyyy")</small></div>
+                                                                <div><small>@DateTime.Now.ToString("HH:mm")h</small></div>
                                                             </td>
                                                             <td class="text-center">
                                                                 @if (item.FlagCongelado)
@@ -127,6 +131,15 @@
                                                                 <div id="temperaturaambiente@(item.IdProduto)" class="text-center">
                                                                     <small>@item.DataValidadeTemperaturaAmbiente</small>
                                                                 </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="Sif[@item.IdProduto]" class="form-control sif-input" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="Lote[@item.IdProduto]" class="form-control lote-input" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" name="Quantidade[@item.IdProduto]" class="form-control quantidade-input" />
                                                             </td>
                                                         </tr>
                                                     }
@@ -228,6 +241,7 @@
                         $row.find("input[type='radio']").prop('checked', false);
                         const produtoId = $checkbox.val().split(';')[0];
                         $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
+                        $row.find(".sif-input, .lote-input, .quantidade-input").val(""); // limpa ao desmarcar
                     }
                 });
             });
@@ -278,29 +292,34 @@
                 $(this).find("input[type='number'], input[type='text'], input[type='radio']").prop('disabled', true);
             });
 
-            // Checkbox individual de linha
-            $("tbody tr td input[type='checkbox']").click(function () {
-                var $checkbox = $(this);
-                var $row = $checkbox.closest('tr');
-                var isChecked = $checkbox.is(':checked');
+           // Checkbox individual de linha
+           $("tbody tr td input[type='checkbox']").click(function () {
+            var $checkbox = $(this);
+            var $row = $checkbox.closest('tr');
+            var isChecked = $checkbox.is(':checked');
 
-                // Habilita/desabilita campos da linha
-                $row.find("input[type='number'], input[type='text'], input[type='radio']")
-                    .prop('disabled', !isChecked);
+            // Habilita/desabilita campos da linha
+            $row.find("input[type='number'], input[type='text'], input[type='radio']")
+                .prop('disabled', !isChecked);
 
-                // Atualiza valor do campo de número
-                $row.find("input[type='number']").val(isChecked ? 1 : 0);
+            // Atualiza valor do campo de número
+            $row.find("input[type='number']").val(isChecked ? 1 : 0);
 
-                // Marca visual
-                $row.toggleClass('highlight', isChecked);
+            // Marca visual
+            $row.toggleClass('highlight', isChecked);
 
-                // Limpa seleção e validade se desmarcado
-                if (!isChecked) {
-                    $row.find("input[type='radio']").prop('checked', false);
-                    const produtoId = $checkbox.val().split(';')[0];
-                    $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
-                }
-            });
+            // Se desmarcado, limpa campos de texto e radios
+            if (!isChecked) {
+                $row.find("input[type='radio']").prop('checked', false);
+
+                // limpa SIF e Lote
+                $row.find(".sif-input, .lote-input, .quantidade-input").val("");
+
+                const produtoId = $checkbox.val().split(';')[0];
+                $(`#congelado${produtoId}, #resfriado${produtoId}, #temperaturaambiente${produtoId}`).hide();
+            }
+        });
+
 
             // Quando um radio for marcado, exibe a data correspondente
             $("input[type='radio'][name^='tipo']").on("change", function () {

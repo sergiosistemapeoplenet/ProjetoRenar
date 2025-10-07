@@ -59,13 +59,12 @@
                     if (consulta != null && consulta.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-sm table-hover" id="tabela">
+                            <table class="table table-sm table-hover" id="tabela2">
                                 <thead>
                                     <tr>
-                                        <th>Loja</th>
+                                        <th>Nome da loja</th>
                                         <th>Razão social</th>
-                                        <th width="25%">Endereço</th>
-                                        <th>Contato</th>
+                                        <th>Região</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -78,48 +77,11 @@
                                             <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
                                                 <div>
                                                     @item.RazaoSocial
-                                                </div>
-                                                <div>
-                                                    CNPJ: @item.CNPJ
-                                                </div>
-                                                <div>
-                                                    Região: @item.Regiao.NomeRegiao
-                                                </div>
-                                                <div>
-                                                    @item.HorarioFuncionamento
-                                                </div>
-                                                <div>
-                                                    @if (item.FlagUnidadePadrao)
-                                                    {
-                                                        <span class="badge badge-success">
-                                                            <i class="fa fa-check-circle"></i>&nbsp;UNIDADE PADRÃO
-                                                        </span>
-                                                    }
-                                                </div>
-                                                <div>
-                                                    @(!string.IsNullOrEmpty(item.SerialImpressora) ? "Impressora: " + item.SerialImpressora : "")
-                                                </div>
-                                            </td>
+                                                </div>                                            
+                                            </td>                                            
                                             <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
                                                 <div>
-                                                    @item.Endereco
-                                                </div>
-                                                <div>
-                                                    @if (!string.IsNullOrEmpty(item.Cep))
-                                                    {
-                                                        <span> CEP: @item.Cep</span>
-                                                    }
-                                                </div>
-                                            </td>
-                                            <td class="clickable" style="cursor: pointer; vertical-align: top;" onclick="atualizar('@ProjetoRenar.Presentation.Mvc.Helpers.EncryptionHelper.Encrypt(item.IDUnidade.ToString())')">
-                                                <div>
-                                                    @item.NomeContato
-                                                </div>
-                                                <div>
-                                                    @item.NumeroContato
-                                                </div>
-                                                <div>
-                                                    @item.EmailContato
+                                                    @item.Regiao.NomeRegiao
                                                 </div>
                                             </td>                                            
                                         </tr>
@@ -145,4 +107,47 @@
             window.location = '/app/unidades/edicao/' + id;
         }
     </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#tabela2').DataTable({
+                "ordering": true, // habilita ordenação
+                "order": [[0, "asc"]], // ordena inicialmente pela 1ª coluna (0 = índice da coluna)
+                "pageLength": 25,
+                "lengthChange": false,
+                "searching": false,
+                "language": {
+                    "sEmptyTable": "Nenhum registro encontrado",
+                    "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                    "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ".",
+                    "sLengthMenu": "_MENU_ resultados por página",
+                    "sLoadingRecords": "Carregando...",
+                    "sProcessing": "Processando...",
+                    "sZeroRecords": "Nenhum registro encontrado",
+                    "sSearch": "Filtrar registros",
+                    "oPaginate": {
+                        "sNext": "Próximo",
+                        "sPrevious": "Anterior",
+                        "sFirst": "Primeiro",
+                        "sLast": "Último"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Ordenar colunas de forma ascendente",
+                        "sSortDescending": ": Ordenar colunas de forma descendente"
+                    },
+                    "select": {
+                        "rows": {
+                            "_": "Selecionado %d linhas",
+                            "0": "Nenhuma linha selecionada",
+                            "1": "Selecionado 1 linha"
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
 }

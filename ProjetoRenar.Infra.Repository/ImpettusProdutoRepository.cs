@@ -132,5 +132,32 @@ namespace ProjetoRenar.Infra.Repository
             return _connection.Query<ControleEtiqueta>(sql).ToList();
         }
 
+        public void IncluirControleImpressao(int idUnidade, int idProduto, int idPreparacao, int quantidadeEtiqueta, int idUsuario)
+        {
+            if(idProduto != 0)
+            {
+                _connection.Execute
+                  ("Impettus.SP_IncluirControleImpressao", new
+                  {
+                      IDUnidade = idUnidade,
+                      IDProduto = idProduto,
+                      IDPreparacao = (int?) null,
+                      QuantidadeEtiqueta = quantidadeEtiqueta,
+                      IDUsuario = idUsuario
+                  }, commandType: System.Data.CommandType.StoredProcedure);
+            }
+            if(idPreparacao != 0)
+            {
+                _connection.Execute
+                  ("Impettus.SP_IncluirControleImpressao", new
+                  {
+                      IDUnidade = idUnidade,
+                      IDProduto = (int?)null,
+                      IDPreparacao = idPreparacao,
+                      QuantidadeEtiqueta = quantidadeEtiqueta,
+                      IDUsuario = idUsuario
+                  }, commandType: System.Data.CommandType.StoredProcedure);
+            }
+        }
     }
 }

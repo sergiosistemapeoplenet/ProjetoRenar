@@ -95,7 +95,7 @@ namespace ProjetoRenar.Infra.Repository
                         configurationSettings.User = Convert.ToString(dr["vc_UsuarioSMTP"]);
                         configurationSettings.SenhaExpressaoRegular = Convert.ToString(dr["SenhaExpressaoRegular"]);
                         configurationSettings.SenhaMensagemOrientacao = Convert.ToString(dr["SenhaMensagemOrientacao"]);
-                        configurationSettings.Pass = crConnection.Decrypt(Convert.ToString(dr["vc_SenhaEmail"]));
+                        try { configurationSettings.Pass = crConnection.Decrypt(Convert.ToString(dr["vc_SenhaEmail"])); } catch (Exception) { }
                         configurationSettings.ChaveCliente = Convert.ToString(dr["vc_ChaveClientePack"]);
                     }
 

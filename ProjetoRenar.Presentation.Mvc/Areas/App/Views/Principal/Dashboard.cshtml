@@ -131,7 +131,7 @@
                         <div class="col-md-5">
 
                             <div class="mb-3">
-                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões no período:</strong>
                             </div>
 
                             @{
@@ -155,7 +155,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosPeriodoRegiao.Count() Regiões</td>
                                             <td style="font-weight: 500;">@dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
                                     </tfoot>
@@ -193,7 +193,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosAgrupadoMesRegiao.Count() Regiões</td>
                                             <td></td>
                                             <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
@@ -220,7 +220,7 @@
                         <div class="col-md-5">
 
                             <div class="mb-3">
-                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões no período:</strong>
                             </div>
 
                             @{
@@ -237,14 +237,14 @@
                                         @foreach (var item in dadosPeriodoUnidade)
                                         {
                                             <tr>
-                                                <td>@item.NomeUnidade</td>
+                                                <td>@(item.NomeUnidade != null ? item.NomeUnidade.ToUpper() : string.Empty)</td>
                                                 <td>@item.Quantidade</td>
                                             </tr>
                                         }
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosPeriodoUnidade.Count() Unidades</td>
                                             <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
                                     </tfoot>
@@ -274,7 +274,7 @@
                                         @foreach (var item in dadosAgrupadoMesUnidade)
                                         {
                                             <tr>
-                                                <td>@item.NomeUnidade</td>
+                                                <td>@(item.NomeUnidade != null ? item.NomeUnidade.ToUpper() : string.Empty)</td>
                                                 <td>@item.MesAno</td>
                                                 <td>@item.Quantidade</td>
                                             </tr>
@@ -282,7 +282,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosAgrupadoMesUnidade.Count() Unidades</td>
                                             <td></td>
                                             <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
@@ -309,7 +309,7 @@
                         <div class="col-md-5">
 
                             <div class="mb-3">
-                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões no período:</strong>
                             </div>
 
                             @{
@@ -333,7 +333,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosPeriodoTipoProduto.Count() Tipos</td>
                                             <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
                                     </tfoot>
@@ -371,7 +371,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td></td>
+                                            <td style="font-weight: bold;">@dadosAgrupadoMesTipoProduto.Count() Tipos</td>
                                             <td></td>
                                             <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                         </tr>
@@ -399,7 +399,7 @@
                             <div class="col-md-5">
 
                                 <div class="mb-3">
-                                    <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões<br />no período:</strong>
+                                    <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões no período:</strong>
                                 </div>
 
                                 @{
@@ -423,7 +423,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td></td>
+                                                <td style="font-weight: bold;">@dadosPeriodoProduto.Count() Produtos</td>
                                                 <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                             </tr>
                                         </tfoot>
@@ -461,7 +461,7 @@
                                         </tbody>
                                         <tfoot>
                                             <tr>
-                                                <td></td>
+                                                <td style="font-weight: bold;">@dadosAgrupadoMesProduto.Count() Produtos</td>
                                                 <td></td>
                                                 <td style="font-weight: 500;"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
                                             </tr>

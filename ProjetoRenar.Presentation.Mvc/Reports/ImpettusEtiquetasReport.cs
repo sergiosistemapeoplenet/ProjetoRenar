@@ -78,8 +78,26 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             document.Add(new Paragraph(modo)
                 .SetFont(fonteArial).SetFontSize(8).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(1));
 
+            if(!string.IsNullOrEmpty(produto.Sif))
+            {
+                document.Add(new Paragraph("SIF:  " + produto.Sif)
+                .SetFont(fonteArial).SetFontSize(6).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(-1));
+            }
+
+            if (!string.IsNullOrEmpty(produto.Lote))
+            {
+                document.Add(new Paragraph("Lote: " + produto.Lote)
+                .SetFont(fonteArial).SetFontSize(6).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(-1));
+            }
+
+            if (!string.IsNullOrEmpty(produto.Quantidade))
+            {
+                document.Add(new Paragraph("Quantidade: " + produto.Quantidade)
+                .SetFont(fonteArial).SetFontSize(6).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(-1));
+            }
+
             var linha = new LineSeparator(new SolidLine(0.5f));
-            document.Add(linha.SetMarginBottom(2).SetMarginTop(2));
+            document.Add(linha.SetMarginBottom(1).SetMarginTop(1));
 
             if(produto.FlagResfriado)
             {
@@ -130,11 +148,17 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                             
             document.Add(linha.SetMarginBottom(2));
 
+            if (string.IsNullOrEmpty(produto.Lote) && string.IsNullOrEmpty(produto.Sif))
+            {
+                document.Add(new Paragraph("\n")
+                .SetFont(fonteArial).SetFontSize(6).SetTextAlignment(TextAlignment.LEFT).SetMarginTop(0).SetMarginBottom(1));
+            }
+
             // Demais informações
-            document.Add(new Paragraph($"RESP: {unidade.NomeContato.ToUpper()}").SetFont(fonteArial).SetFontSize(7.5f).SetMargin(0).SetBold().SetMarginTop(1).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph(unidade.NomeUnidade.ToUpper()).SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph($"CNPJ: " + unidade.CNPJ).SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
-            document.Add(new Paragraph($"CEP: {unidade.Cep} - {unidade.Endereco}").SetFont(fonteArial).SetFontSize(6.5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"RESP: {unidade.NomeContato.ToUpper()}").SetFont(fonteArial).SetFontSize(5f).SetMargin(0).SetBold().SetMarginTop(1).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph(unidade.NomeUnidade.ToUpper()).SetFont(fonteArial).SetFontSize(5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"CNPJ: " + unidade.CNPJ).SetFont(fonteArial).SetFontSize(5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
+            document.Add(new Paragraph($"{unidade.Endereco}" + $" - CEP: {unidade.Cep}").SetFont(fonteArial).SetFontSize(5f).SetMargin(0).SetTextAlignment(TextAlignment.LEFT));
 
             // … (seu conteúdo anterior permanece igual, mas remova o document.Add(barcodeImage); antes da parte que trata o barcode)
 
@@ -166,6 +190,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 NomeProduto = produto.Nome.ToUpper(),
                 FlagPreparacao = produto.FlagPreparacao,
                 FlagProduto = produto.FlagProduto,
+                SIF = produto.Sif != null ? produto.Sif.ToString() : string.Empty,
+                Lote = produto.Lote != null ? produto.Lote.ToString() : string.Empty,
+                Quantidade = produto.Quantidade != null ? produto.Quantidade.ToString() : string.Empty,
                 ModosConservacao = new List<string>
                 {
                     produto.FlagResfriado ? "RESFRIADO" : null,
@@ -213,6 +240,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             public string CodigoBarras { get; set; }
             public bool FlagProduto { get; set; }
             public bool FlagPreparacao { get; set; }
+            public string SIF { get; set; }
+            public string Lote { get; set; }
+            public string Quantidade { get; set; }
         }
 
 

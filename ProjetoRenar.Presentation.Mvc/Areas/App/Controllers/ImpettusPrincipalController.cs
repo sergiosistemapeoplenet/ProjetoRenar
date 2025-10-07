@@ -88,6 +88,28 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
             filtros.Etiquetas = etiquetas;
 
+            var hoje = DateTime.Now.Date;
+
+            filtros.Etiquetas = filtros.Etiquetas.Where(item =>
+            {
+                if (!DateTime.TryParse(item.Etiqueta.DataValidade, out var dataValidade))
+                    return true; // mantém se não conseguir interpretar data
+
+                switch (filtros.StatusValidade)
+                {
+                    case StatusValidadeFiltro.Vencido:
+                        return dataValidade < hoje;
+                    case StatusValidadeFiltro.AVencer:
+                        var diffDias = (dataValidade - hoje).TotalDays;
+                        return diffDias >= 0 && diffDias <= 1;
+                    case StatusValidadeFiltro.Valido:
+                        return dataValidade > hoje.AddDays(1);
+                    default:
+                        return true; // Todos
+                }
+            }).ToList();
+
+
             return View(filtros);
         }
 
@@ -521,7 +543,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
 
         [HttpPost]
-        public IActionResult Imprimir(string[] IdsProdutos, string[] QtdImpressoes)
+        public IActionResult Imprimir(string[] IdsProdutos, string[] QtdImpressoes, Dictionary<int, string> Sif, Dictionary<int, string> Lote, Dictionary<int, string> Quantidade)
         {
             try
             {
@@ -543,7 +565,6 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             Nome = produto.NomeProduto,
                             NomeGrupo = _unitOfWork.ImpettusGruposProdutoRepository.GetById(produto.IdGrupoProduto.Value).NomeGrupoProduto,
                             QtdImpressoes = int.Parse(QtdImpressoes[i]),
-                            Sif = produto.Sif,
                             TipoValidadeResfriado = produto.TipoValidadeResfriado,
                             TipoValidadeTemperaturaAmbiente = produto.TipoValidadeTemperaturaAmbiente,
                             ValidadeCongelado = produto.ValidadeCongelado,
@@ -551,7 +572,10 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente,
                             ProdutoPreparacao = "produto",
                             FlagProduto = true,
-                            FlagPreparacao = false
+                            FlagPreparacao = false,
+                            Sif = Sif[produto.IdProduto],
+                            Lote = Lote[produto.IdProduto],
+                            Quantidade = Quantidade[produto.IdProduto],
                         });
                     }
                     else if(tipoProduto.Equals("2"))
@@ -564,8 +588,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             IdGrupo = produto.IdGrupoPreparacao,
                             Nome = produto.NomePreparacao,
                             NomeGrupo = _unitOfWork.ImpettusGruposPreparacoesRepository.GetById(produto.IdGrupoPreparacao.Value).NomeGrupoPreparacao,
-                            QtdImpressoes = int.Parse(QtdImpressoes[i]),
-                            Sif = produto.Sif,
+                            QtdImpressoes = int.Parse(QtdImpressoes[i]),                           
                             TipoValidadeResfriado = produto.TipoValidadeResfriado,
                             TipoValidadeTemperaturaAmbiente = produto.TipoValidadeTemperaturaAmbiente,
                             ValidadeCongelado = produto.ValidadeCongelado,
@@ -573,7 +596,10 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                             ValidadeTemperaturaAmbiente = produto.ValidadeTemperaturaAmbiente,
                             ProdutoPreparacao = "preparacao",
                             FlagProduto = false,
-                            FlagPreparacao = true
+                            FlagPreparacao = true,
+                            Sif = Sif[produto.IdPreparacao],
+                            Lote = Lote[produto.IdPreparacao],
+                            Quantidade = Quantidade[produto.IdPreparacao],
                         });
                     }
 
@@ -647,8 +673,16 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
                             if (minhaContaUsuario.Unidades != null && minhaContaUsuario.Unidades.FirstOrDefault() != null)
                             {
-                                _unitOfWork.ProdutoRepository.IncluirControleImpressao
-                                    (minhaContaUsuario.Unidades.FirstOrDefault().IDUnidade, item.Id, item.QtdImpressoes, minhaContaUsuario.IdUsuario);
+                                if(item.ProdutoPreparacao != null && item.ProdutoPreparacao.Equals("produto"))
+                                {
+                                    _unitOfWork.ImpettusProdutoRepository.IncluirControleImpressao
+                                        (minhaContaUsuario.Unidades.FirstOrDefault().IDUnidade, item.Id, 0, item.QtdImpressoes, minhaContaUsuario.IdUsuario);
+                                }
+                                if (item.ProdutoPreparacao != null && item.ProdutoPreparacao.Equals("preparacao"))
+                                {
+                                    _unitOfWork.ImpettusProdutoRepository.IncluirControleImpressao
+                                        (minhaContaUsuario.Unidades.FirstOrDefault().IDUnidade, 0, item.Id, item.QtdImpressoes, minhaContaUsuario.IdUsuario);
+                                }
                             }
                         }
                         catch (Exception e)
@@ -658,10 +692,21 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                     }
 
                     var minhaConta = JsonConvert.DeserializeObject<MinhaContaViewModel>(User.Identity.Name);
+                    var usuario = _unitOfWork.UsuarioRepository.Get(minhaConta.EmailUsuario);
+
                     var unidade = minhaConta.Unidades.FirstOrDefault(u => u.FlagUnidadePadrao);
+
+                    try
+                    {
+                        if (string.IsNullOrEmpty(usuario.Nome)) usuario.Nome = "-";
+
+                        if (unidade != null) unidade.NomeContato = usuario.Nome;
+                        minhaConta.Unidades[0].NomeContato = usuario.Nome;
+                    }
+                    catch (Exception e) { }
                     
                     if(unidade != null)
-                    {
+                    {                        
                         pdfBytes = ImpettusEtiquetasReport.ImprimirEtiqueta(produtos, unidade, _unitOfWork);
                     }
                     else if(minhaConta.Unidades != null && minhaConta.Unidades.Count > 0)
@@ -709,6 +754,8 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
         public string ProdutoPreparacao { get; set; }
         public bool FlagProduto { get; set; }
         public bool FlagPreparacao{ get; set; }
+        public string Lote { get; set; }
+        public string Quantidade { get; set; }
     }
 
     public class ControleEtiquetaModel
@@ -729,6 +776,15 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
         public DateTime? DataFim { get; set; }
 
         public List<ControleEtiquetaModel> Etiquetas { get; set; } = new List<ControleEtiquetaModel>();
+
+        public StatusValidadeFiltro StatusValidade { get; set; } = StatusValidadeFiltro.Todos;
     }
 
+    public enum StatusValidadeFiltro
+    {
+        Todos,
+        Vencido,
+        AVencer,
+        Valido
+    }
 }

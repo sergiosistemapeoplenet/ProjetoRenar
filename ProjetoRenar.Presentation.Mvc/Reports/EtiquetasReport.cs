@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using iText.IO.Image;
 using iText.Kernel.Colors;
 using iText.Kernel.Geom;
@@ -11,10 +12,13 @@ using iText.Layout;
 using iText.Layout.Borders;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using Microsoft.AspNetCore.Hosting.Internal;
 using ProjetoRenar.Application.ViewModels.Produtos;
 using ProjetoRenar.Application.ViewModels.Unidades;
 using ProjetoRenar.Domain.Entities;
 using QRCoder;
+using System.Web;
+using Microsoft.AspNetCore.Hosting;
 
 namespace ProjetoRenar.Presentation.Mvc.Reports
 {
@@ -22,7 +26,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
     {
         private static ConsultaUnidadeViewModel _unidade;
 
-        public static byte[] ImprimirEtiqueta(TipoLayoutEtiqueta tipo, List<ConsultaProdutoViewModel> produtos, ConsultaUnidadeViewModel unidade)
+        public static byte[] ImprimirEtiqueta(TipoLayoutEtiqueta tipo, List<ConsultaProdutoViewModel> produtos, ConsultaUnidadeViewModel unidade, IHostingEnvironment httpContext)
         {
             _unidade = unidade;
 
@@ -36,7 +40,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             return null;
         }
 
-        public static byte[] ImprimirEtiqueta(List<ConsultaProdutoViewModel> produtos, ConsultaUnidadeViewModel unidade)
+        public static byte[] ImprimirEtiqueta(List<ConsultaProdutoViewModel> produtos, ConsultaUnidadeViewModel unidade, IHostingEnvironment httpContext)
         {
             _unidade = unidade;
 
@@ -68,10 +72,10 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
 
                 switch (grupo.Key)
                 {
-                    case 1: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBolo1Coluna(pdfDoc, document, width, grupo.Value); break;
-                    case 2: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBoloPote2Colunas(document, width, grupo.Value); break;
-                    case 3: document.SetMargins(-2.5f, 0, 0, 16); ImprimirFatia2Colunas(document, width, grupo.Value); break;
-                    case 4: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBoloPote2ColunasQRCode(document, width, grupo.Value); break;
+                    case 1: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBolo1Coluna(pdfDoc, document, width, grupo.Value, httpContext); break;
+                    case 2: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBoloPote2Colunas(document, width, grupo.Value, httpContext); break;
+                    case 3: document.SetMargins(-2.5f, 0, 0, 16); ImprimirFatia2Colunas(document, width, grupo.Value, httpContext); break;
+                    case 4: document.SetMargins(-2.5f, 0, 0, 16); ImprimirBoloPote2ColunasQRCode(document, width, grupo.Value, httpContext); break;
                 }
             }
 
@@ -84,7 +88,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
         }
 
 
-        public static void ImprimirBolo1Coluna(PdfDocument pdf, Document document, float width, List<ConsultaProdutoViewModel> produtos)
+        public static void ImprimirBolo1Coluna(PdfDocument pdf, Document document, float width, List<ConsultaProdutoViewModel> produtos, IHostingEnvironment httpContext)
         {
             for (int p = 0; p < produtos.Count; p++)
             {
@@ -92,12 +96,12 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 for (int i = 1; i <= item.QtdImpressoes; i++)
                 {
                     bool isNotLast = !(p == produtos.Count - 1 && i == item.QtdImpressoes);
-                    try { AddContentBolo1Coluna(pdf, document, width, item, isNotLast); } catch (Exception e) { }
+                    try { AddContentBolo1Coluna(pdf, document, width, item, isNotLast, httpContext); } catch (Exception e) { }
                 }
             }
         }
 
-        public static void ImprimirBoloPote2Colunas(Document document, float width, List<ConsultaProdutoViewModel> produtos)
+        public static void ImprimirBoloPote2Colunas(Document document, float width, List<ConsultaProdutoViewModel> produtos, IHostingEnvironment httpContext)
         {
             List<ConsultaProdutoViewModel> filaImpressao = new List<ConsultaProdutoViewModel>();
 
@@ -114,11 +118,11 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var itemEsquerda = filaImpressao[i];
                 var itemDireita = (i + 1 < filaImpressao.Count) ? filaImpressao[i + 1] : null;
 
-                try { AddContentBoloPote2Colunas(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count); } catch (Exception e) { }
+                try { AddContentBoloPote2Colunas(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count, httpContext); } catch (Exception e) { }
             }
         }
 
-        public static void ImprimirBoloPote2ColunasQRCode(Document document, float width, List<ConsultaProdutoViewModel> produtos)
+        public static void ImprimirBoloPote2ColunasQRCode(Document document, float width, List<ConsultaProdutoViewModel> produtos, IHostingEnvironment httpContext)
         {
             List<ConsultaProdutoViewModel> filaImpressao = new List<ConsultaProdutoViewModel>();
 
@@ -135,12 +139,12 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var itemEsquerda = filaImpressao[i];
                 var itemDireita = (i + 1 < filaImpressao.Count) ? filaImpressao[i + 1] : null;
 
-                try { AddContentBoloPote2ColunasQRCode(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count); } catch (Exception e) { }
+                try { AddContentBoloPote2ColunasQRCode(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count, httpContext); } catch (Exception e) { }
             }
         }
 
 
-        public static void ImprimirFatia2Colunas(Document document, float width, List<ConsultaProdutoViewModel> produtos)
+        public static void ImprimirFatia2Colunas(Document document, float width, List<ConsultaProdutoViewModel> produtos, IHostingEnvironment httpContext)
         {
             List<ConsultaProdutoViewModel> filaImpressao = new List<ConsultaProdutoViewModel>();
 
@@ -157,7 +161,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var itemEsquerda = filaImpressao[i];
                 var itemDireita = (i + 1 < filaImpressao.Count) ? filaImpressao[i + 1] : null;
 
-                try { AddContentFatia2Colunas(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count); } catch (Exception e) { }
+                try { AddContentFatia2Colunas(document, width, itemEsquerda, itemDireita, itemDireita != null && (i + 2) < filaImpressao.Count, httpContext); } catch (Exception e) { }
             }
         }
 
@@ -271,9 +275,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
         }
         */
 
-        static void AddContentBolo1Coluna(PdfDocument pdf, Document document, float width, ConsultaProdutoViewModel produto, bool quebraDePagina)
+        static void AddContentBolo1Coluna(PdfDocument pdf, Document document, float width, ConsultaProdutoViewModel produto, bool quebraDePagina, IHostingEnvironment httpContext)
         {
-            string caminhoParaArial = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "Arial.ttf");
+            string caminhoParaArial = System.IO.Path.Combine(httpContext.ContentRootPath, "Fonts", "Arial.ttf");
             var fonteArial = iText.Kernel.Font.PdfFontFactory.CreateFont(caminhoParaArial, "Identity-H", true);
 
             if(produto.NomeProduto.Length <= 42)
@@ -369,7 +373,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
 
             if(produto.TipoProduto.FlagAltoAcucar == 1 && produto.TipoProduto.FlagAltoGorduraSaturada == 1)
             {
-                string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                 Image image = new Image(ImageDataFactory.Create(imagePath));
                 float scaleFactor = 0.90f; // Reduz em 25%
 
@@ -383,7 +387,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             }
             else if (produto.TipoProduto.FlagAltoAcucar == 1)
             {
-                string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                 Image image = new Image(ImageDataFactory.Create(imagePath));
                 float scaleFactor = 0.90f; // Reduz em 25%
 
@@ -400,7 +404,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
             }
             else if (produto.TipoProduto.FlagAltoGorduraSaturada == 1)
             {
-                string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                 Image image = new Image(ImageDataFactory.Create(imagePath));
                 float scaleFactor = 0.90f; // Reduz em 25%
 
@@ -621,9 +625,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
         }
 
-        static void AddContentBoloPote2Colunas(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina)
+        static void AddContentBoloPote2Colunas(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina, IHostingEnvironment httpContext)
         {
-            string caminhoParaArial = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "Arial.ttf");
+            string caminhoParaArial = System.IO.Path.Combine(httpContext.ContentRootPath, "Fonts", "Arial.ttf");
             var fonteArial = iText.Kernel.Font.PdfFontFactory.CreateFont(caminhoParaArial, "Identity-H");
 
             Table table = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }))
@@ -748,7 +752,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto1.TipoProduto.FlagAltoAcucar == 1 && produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -759,7 +763,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -770,7 +774,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -915,7 +919,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto2.TipoProduto.FlagAltoAcucar == 1 && produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -926,7 +930,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -937,7 +941,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1001,9 +1005,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
         }
 
 
-        static void AddContentBoloPote2ColunasQRCode(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina)
+        static void AddContentBoloPote2ColunasQRCode(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina, IHostingEnvironment httpContext)
         {
-            string caminhoParaArial = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "Arial.ttf");
+            string caminhoParaArial = System.IO.Path.Combine(httpContext.ContentRootPath, "Fonts", "Arial.ttf");
             var fonteArial = iText.Kernel.Font.PdfFontFactory.CreateFont(caminhoParaArial, "Identity-H");
 
             Table table = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }))
@@ -1082,7 +1086,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto1.TipoProduto.FlagAltoAcucar == 1 && produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1093,7 +1097,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1104,7 +1108,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1203,7 +1207,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto2.TipoProduto.FlagAltoAcucar == 1 && produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1214,7 +1218,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1225,7 +1229,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.60f; // Reduz em 25%
 
@@ -1289,9 +1293,9 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
         }
 
 
-        static void AddContentFatia2Colunas(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina)
+        static void AddContentFatia2Colunas(Document document, float width, ConsultaProdutoViewModel produto1, ConsultaProdutoViewModel produto2, bool quebraDePagina, IHostingEnvironment httpContext)
         {
-            string caminhoParaArial = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fonts", "Arial.ttf");
+            string caminhoParaArial = System.IO.Path.Combine(httpContext.ContentRootPath, "Fonts", "Arial.ttf");
             var fonteArial = iText.Kernel.Font.PdfFontFactory.CreateFont(caminhoParaArial, "Identity-H");
 
             Table table = new Table(UnitValue.CreatePercentArray(new float[] { 50, 50 }))
@@ -1415,7 +1419,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto1.TipoProduto.FlagAltoAcucar == 1 && produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1426,7 +1430,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1437,7 +1441,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto1.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1577,7 +1581,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 var imagem = new Paragraph();
                 if (produto2.TipoProduto.FlagAltoAcucar == 1 && produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1588,7 +1592,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoAcucar == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_acucar_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_acucar_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 
@@ -1599,7 +1603,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 }
                 else if (produto2.TipoProduto.FlagAltoGorduraSaturada == 1)
                 {
-                    string imagePath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "alto_gordura_horizontal.png");
+                    string imagePath = System.IO.Path.Combine(httpContext.WebRootPath, "Images", "alto_gordura_horizontal.png");
                     Image image = new Image(ImageDataFactory.Create(imagePath));
                     float scaleFactor = 0.50f; // Reduz em 25%
 

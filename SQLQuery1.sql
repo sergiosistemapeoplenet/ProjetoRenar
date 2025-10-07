@@ -1,5 +1,11 @@
-﻿select * from clientesistema
+﻿select * from Renar.Unidade
+select * from Renar.Regiao
 
-update clientesistema
-set vc_connectionstring='+/3poKvyHiN7fj4xLSFUHDjQiBtCo0cTPH8TG4aPXNz6MBCQs/l+sExxLJJHZSWKyj7H6SEh4qxULYJatYxk1t5wDBcOLn1wMTm0czxGDm+/UuS54fWgyFZa/sYHmq0jJ41pAW+4CV4xQnNxSwJbVw=='
-where in_idclientesistema = 1
+select * from Acesso.Usuario
+
+update Acesso.Usuario
+set FlagPrimeiroAcesso = 1
+where IDUsuario = 42
+
+insert into Renar.Unidade(NomeUnidade, CNPJ, IDRegiao, Endereco, FlagAtivo, Cep, HorarioFuncionamento, QuantidadeUso, SerialImpressora, NomeContato, EmailContato, FlagImprimeCodigoBarra)
+values('Mané Recreio', '46678364000126', 1, 'Rua Carlos Galhardo, 85 - Recreio do Bandeirantes RJ', 1, '22750440', '11h às 22h', 1, NULL, 'Pamela', 'Recreio@botecomane.com.br', 0)

@@ -1,35 +1,21 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Threading.Tasks;
+using System.Globalization;
+using DNTCaptcha.Core;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProjetoRenar.Application.Profiles;
-using ProjetoRenar.Domain.Contracts.Cryptographies;
-using ProjetoRenar.Domain.Contracts.Messages;
-using ProjetoRenar.Domain.Contracts.Repositories;
-using ProjetoRenar.Domain.Contracts.Services;
-using ProjetoRenar.Domain.Services;
-using ProjetoRenar.Infra.Cryptography;
-using ProjetoRenar.Infra.Message;
-using ProjetoRenar.Infra.Repository;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using ProjetoRenar.Presentation.Mvc.Filters;
-using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Mvc.Filters;
-using ProjetoRenar.CrossCutting.Configurations;
-using Sidetech.Framework.Cryptography;
+using ProjetoRenar.Application.Profiles;
 using ProjetoRenar.Application.ViewModels.Usuarios;
-using Microsoft.AspNetCore.Routing;
-using System.Globalization;
-using DNTCaptcha.Core;
+using ProjetoRenar.CrossCutting.Configurations;
+using ProjetoRenar.Domain.Contracts.Repositories;
+using ProjetoRenar.Presentation.Mvc.Filters;
+using Sidetech.Framework.Cryptography;
 
 namespace ProjetoRenar.Presentation.Mvc
 {
@@ -47,7 +33,7 @@ namespace ProjetoRenar.Presentation.Mvc
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddDNTCaptcha(options =>
-                    options.UseCookieStorageProvider().ShowThousandsSeparators(false)
+                options.UseCookieStorageProvider().ShowThousandsSeparators(false)
             );
 
             DependencyInjection.Register(services);
@@ -55,12 +41,31 @@ namespace ProjetoRenar.Presentation.Mvc
 
             services.Configure<CookiePolicyOptions>(options =>
             {
-                //options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddAuthentication
-                (CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            // Autenticação com cookie persistente
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            // Configuração do cookie de autenticação
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(365); // 1 ano
+                options.SlidingExpiration = true; // renova a cada requisição
+                options.LoginPath = "/account/login";
+                options.LogoutPath = "/account/logout";
+            });
+
+            // Sessão HTTP
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(365); // 1 ano sem expirar
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             services.AddMvc(options =>
             {
@@ -68,51 +73,23 @@ namespace ProjetoRenar.Presentation.Mvc
                 options.Filters.Add(new PerfilActionFilter());
             }).AddSessionStateTempDataProvider();
 
-            //services.AddRouting(options => options.LowercaseUrls = true);
-
-            // Configurações de sessão
-            services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromDays(7); // Mantém a sessão ativa por 1 dia
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-
-            // Configurações de autenticação
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.ExpireTimeSpan = TimeSpan.FromDays(7); // Tempo de expiração de 1 dia
-                options.SlidingExpiration = true; // Renova o tempo de expiração a cada requisição
-            });
-
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.ExpireTimeSpan = TimeSpan.FromDays(7);
-                options.SlidingExpiration = true;
-            });
-
             services.AddHsts(options =>
             {
-                options.IncludeSubDomains = true; // Inclua subdomínios no cabeçalho HSTS (opcional)
-                options.MaxAge = TimeSpan.FromDays(365); // Especifique a duração do HSTS em dias
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(365);
             });
 
             services.AddAntiforgery(options =>
             {
-                options.HeaderName = "X-XSRF-TOKEN"; // Nome do cabeçalho personalizado para o token anti-CSRF
-                options.Cookie.Name = "XSRF-TOKEN";   // Nome do cookie para o token anti-CSRF
-                options.Cookie.HttpOnly = false;       // O cookie pode ser lido por JavaScript
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.Cookie.Name = "XSRF-TOKEN";
+                options.Cookie.HttpOnly = false;
             });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseDeveloperExceptionPage();
-
             var cultureInfo = new CultureInfo("pt-BR");
-
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
@@ -124,7 +101,6 @@ namespace ProjetoRenar.Presentation.Mvc
 
             app.UseMiddleware<LoginAttemptsMiddleware>();
             app.UseMiddleware<RemoveScriptMiddleware>();
-            //app.UseMiddleware<StaticFilesAuthenticationMiddleware>();
 
             if (env.IsDevelopment())
             {
@@ -136,7 +112,7 @@ namespace ProjetoRenar.Presentation.Mvc
             }
 
             app.UseHsts();
-            app.UseHttpsRedirection(); // Redireciona todas as solicitações HTTP para HTTPS
+            app.UseHttpsRedirection();
 
             app.Use(async (ctx, next) =>
             {
@@ -158,18 +134,23 @@ namespace ProjetoRenar.Presentation.Mvc
                 }
             });
 
-            //app.UseMiddleware<NoCache>();
-            
             app.UseStaticFiles();
             app.UseCookiePolicy();
+
+            // ORDEM CORRETA
+            app.UseSession();           // Sessão antes da autenticação
             app.UseAuthentication();
-           
-            app.UseSession();
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute(name: "areas", template: "{area:exists}/{controller=principal}/{action=index}/{id?}");
-                routes.MapRoute(name: "default", template: "{controller=account}/{action=login}/{id?}");
+                routes.MapRoute(
+                    name: "areas",
+                    template: "{area:exists}/{controller=principal}/{action=index}/{id?}"
+                );
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=account}/{action=login}/{id?}"
+                );
             });
         }
     }
@@ -181,11 +162,10 @@ namespace ProjetoRenar.Presentation.Mvc
         public void OnActionExecuting(ActionExecutingContext context)
         {
             var crConnection = new DefaultCrypto(DefaultCrypto.Algorithms.Rijndael);
-            //var urlBase = context.HttpContext.Request.Host.ToString().Split('.')[0];    
             var urlBase = AppSettings.UrlBase;
 
             if (context.HttpContext.Request.Cookies["peoplenet_client"] == null
-                || !crConnection.Encrypt(urlBase).Equals(context.HttpContext.Request.Cookies["peoplenet_client"].ToString()))
+                || !crConnection.Encrypt(urlBase).Equals(context.HttpContext.Request.Cookies["peoplenet_client"]))
             {
                 var configurationSettings = ConfiguracaoGlobalCliente.Get(urlBase);
                 var json = JsonConvert.SerializeObject(configurationSettings);
@@ -196,10 +176,7 @@ namespace ProjetoRenar.Presentation.Mvc
             }
         }
 
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-
-        }
+        public void OnActionExecuted(ActionExecutedContext context) { }
     }
 
     public class PerfilActionFilter : IActionFilter, IOrderedFilter
@@ -208,42 +185,9 @@ namespace ProjetoRenar.Presentation.Mvc
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            /*
-            if(context.HttpContext.User.Identity.IsAuthenticated && context.HttpContext.User.Identity.Name != null)
-            {
-                var minhaConta = JsonConvert.DeserializeObject<MinhaContaViewModel>
-                (context.HttpContext.User.Identity.Name);
-
-                if(minhaConta != null && minhaConta.RecursosBloqueados != null)
-                {
-                    var bloqueado = false;
-                    foreach (var item in minhaConta.RecursosBloqueados)
-                    {
-                        if (context.HttpContext.Request.Path.Value.Contains(item))
-                        {
-                            bloqueado = true;
-                            break;
-                        }
-                    }
-
-                    if (bloqueado)
-                    {
-                        context.Result = new RedirectToRouteResult(
-                        new RouteValueDictionary
-                        {
-                    { "controller", "Principal" },
-                    { "action", "NaoAutorizado" },
-                    { "areas", "App" }
-                        });
-                    }
-                }
-            }
-            */
+            // lógica comentada no original
         }
 
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-
-        }
+        public void OnActionExecuted(ActionExecutedContext context) { }
     }
 }

@@ -301,7 +301,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                         item.TipoProduto = tipoProdutoApplicationService.Obter(Convert.ToInt32(item.IDTipoProduto));
                     }
 
-                    pdfBytes = EtiquetasReport.ImprimirEtiqueta(produtos, unidade);
+                    pdfBytes = EtiquetasReport.ImprimirEtiqueta(produtos, unidade, environment);
 
                     /*
                     var tipoProduto = tipoProdutoApplicationService.Obter((int) produtos.FirstOrDefault().IDTipoProduto);

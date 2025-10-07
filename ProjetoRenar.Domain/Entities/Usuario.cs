@@ -7,6 +7,7 @@ namespace ProjetoRenar.Domain.Entities
     public class Usuario
     {
         public short IDUsuario { get; set; }
+        public string Nome { get; set; }
         public string SenhaUsuario { get; set; }
         public string EmailUsuario { get; set; }
         public DateTime? DataUltimoAcesso { get; set; }

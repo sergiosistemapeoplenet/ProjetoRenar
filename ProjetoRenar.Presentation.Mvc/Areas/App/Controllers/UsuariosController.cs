@@ -162,7 +162,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                 string smtpServidor = "smtplw.com.br";
                 int smtpPorta = 587;
                 string smtpLogin = "nao-responder@sistemapeoplenet.com.br";
-                string smtpSenha = "lJOoOdCh5452";
+                string smtpSenha = "SPpeoplenet25";
 
                 //using (var smtpClient = new SmtpClient(smtpServidor, smtpPorta))
                 //{
@@ -261,7 +261,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 </head>
 <body>
     <div class='container'>
-        <img class='logo' src='http://186.202.37.229:99/images/peoplenetlogo-novo-peq.png' alt='Renar Etiquetas'>
+        <img class='logo' src='http://voalzira.renaretiquetas.com.br/Renar/images/peoplenetlogo-novo-peq.png' alt='Renar Etiquetas'>
         <h2>Conta Criada com Sucesso</h2>
         <p>Olá,</p>
         <p>Sua conta foi criada com sucesso no sistema Renar Etiquetas.</p>
@@ -270,7 +270,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
             <p>Senha de acesso: <strong>" + senhaUsuario + @"</strong></p>
         </div>
         <p>Para acessar o sistema, clique no botão abaixo:</p>
-        <a class='button' href='http://186.202.37.229:99/'>Acessar o Sistema</a>
+        <a class='button' href='http://voalzira.renaretiquetas.com.br/Renar'>Acessar o Sistema</a>
         <p class='footer'>Este e-mail foi enviado automaticamente, por favor, não responda.</p>
     </div>
 </body>
@@ -281,7 +281,7 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
 
                 SmtpClient smtpClient = new SmtpClient("smtplw.com.br", 587);
-                smtpClient.Credentials = new NetworkCredential("sidetech", "lJOoOdCh5452");
+                smtpClient.Credentials = new NetworkCredential("sidetech", "SPpeoplenet25");
                 smtpClient.EnableSsl = true;
 
                 smtpClient.Send(mail);

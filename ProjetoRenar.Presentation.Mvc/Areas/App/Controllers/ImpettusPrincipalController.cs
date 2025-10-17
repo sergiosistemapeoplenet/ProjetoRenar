@@ -213,19 +213,19 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                     {
                         item.DataValidadeCongelado = DateTime.Now.AddDays(item.ValidadeCongelado.Value).ToString("dd/MM/yyyy");
                     }
-                    if (item.FlagResfriado && item.TipoValidadeResfriado.Equals("D"))
+                    if (item.FlagResfriado && item.TipoValidadeResfriado != null && item.TipoValidadeResfriado.Equals("D"))
                     {
                         item.DataValidadeResfriado = DateTime.Now.AddDays(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy");
                     }
-                    if (item.FlagResfriado && item.TipoValidadeResfriado.Equals("H"))
+                    if (item.FlagResfriado && item.TipoValidadeResfriado != null && item.TipoValidadeResfriado.Equals("H"))
                     {
                         item.DataValidadeResfriado = DateTime.Now.AddHours(item.ValidadeResfriado.Value).ToString("dd/MM/yyyy - HH'H'mm");
                     }
-                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente.Equals("D"))
+                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente != null && item.TipoValidadeTemperaturaAmbiente.Equals("D"))
                     {
                         item.DataValidadeTemperaturaAmbiente = DateTime.Now.AddDays(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy");
                     }
-                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente.Equals("H"))
+                    if (item.FlagTemperaturaAmbiente && item.TipoValidadeTemperaturaAmbiente != null && item.TipoValidadeTemperaturaAmbiente.Equals("H"))
                     {
                         item.DataValidadeTemperaturaAmbiente = DateTime.Now.AddHours(item.ValidadeTemperaturaAmbiente.Value).ToString("dd/MM/yyyy - HH'H'mm");
                     }

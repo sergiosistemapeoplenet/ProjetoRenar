@@ -9,7 +9,6 @@ namespace ProjetoRenar.Application.ViewModels.Usuarios
 {
     public class RedefinirSenhaViewModel
     {        
-        [Required(ErrorMessage = "Por favor, informe a senha atual.")]
         public string SenhaAtualUsuario { get; set; }
 
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 

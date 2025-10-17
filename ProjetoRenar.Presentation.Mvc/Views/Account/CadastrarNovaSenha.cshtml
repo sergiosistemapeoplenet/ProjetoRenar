@@ -91,17 +91,30 @@
                                         @Html.HiddenFor(model => model.IdUsuario)
                                         @Html.HiddenFor(model => model.Token)
 
-                                        <div class="form-label-group">
-                                            @Html.PasswordFor(model => model.NovaSenha, new { @id = "inputSenha", @class = "form-control", @placeholder = "Informe sua nova senha", @autocomplete = "off" })
+                                        <div class="form-label-group position-relative">
+                                            @Html.PasswordFor(model => model.NovaSenha, new { @id = "inputNovaSenha", @class = "form-control", @placeholder = "Informe sua nova senha", @autocomplete = "off" })
                                             <span class="text-danger" style="font-size: 10pt;">@Html.ValidationMessageFor(model => model.NovaSenha)</span>
-                                            <label for="inputSenha"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Nova senha</label>
+                                            <label for="inputNovaSenha"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Nova senha</label>
+
+                                            <!-- Ícone do olhinho -->
+                                            <span id="toggleNovaSenha"
+                                                  style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #3f6ad8;">
+                                                <i class="fa fa-eye" id="eyeIconNovaSenha"></i>
+                                            </span>
                                         </div>
 
-                                        <div class="form-label-group">
-                                            @Html.PasswordFor(model => model.NovaSenhaConfirmacao, new { @id = "inputSenha", @class = "form-control", @placeholder = "Confirme sua nova senha", @autocomplete = "off" })
+                                        <div class="form-label-group position-relative">
+                                            @Html.PasswordFor(model => model.NovaSenhaConfirmacao, new { @id = "inputConfirmarSenha", @class = "form-control", @placeholder = "Confirme sua nova senha", @autocomplete = "off" })
                                             <span class="text-danger" style="font-size: 10pt;">@Html.ValidationMessageFor(model => model.NovaSenhaConfirmacao)</span>
-                                            <label for="inputSenha"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Confirme a nova senha</label>
+                                            <label for="inputConfirmarSenha"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Confirme a nova senha</label>
+
+                                            <!-- Ícone do olhinho -->
+                                            <span id="toggleConfirmarSenha"
+                                                  style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #3f6ad8;">
+                                                <i class="fa fa-eye" id="eyeIconConfirmarSenha"></i>
+                                            </span>
                                         </div>
+
 
                                         <button class="btn btn-primary btn-block text-uppercase"
                                                 type="submit" style="font-size: 11pt;" onclick="loading()">
@@ -141,7 +154,7 @@
 
                     <div class="row">
                         <div class="col-md-12 text-center">
-                            <div style="color: #fff;">Copyright © 2024 | Versão 3.3</div>
+                            <div style="color: #fff;">Copyright © 2024 | Versão 3.3.3</div>
                         </div>
                     </div>
 
@@ -179,6 +192,27 @@
                 });
             });
         </script>
+
+        <script>
+            function togglePassword(inputId, iconId) {
+                const input = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            }
+
+            document.getElementById('toggleNovaSenha').addEventListener('click', function () {
+                togglePassword('inputNovaSenha', 'eyeIconNovaSenha');
+            });
+
+            document.getElementById('toggleConfirmarSenha').addEventListener('click', function () {
+                togglePassword('inputConfirmarSenha', 'eyeIconConfirmarSenha');
+            });
+        </script>
+
 
     </div>
 </body>

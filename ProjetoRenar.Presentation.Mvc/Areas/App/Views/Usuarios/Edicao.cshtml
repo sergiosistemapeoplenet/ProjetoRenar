@@ -56,9 +56,11 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label>Nova Senha:</label>
-                                @Html.PasswordFor(model => model.NovaSenha, new { @class = "form-control", placeholder = "Digite a nova senha" })
-                                <div class="text-danger">
-                                    @Html.ValidationMessageFor(model => model.NovaSenha)
+                                <div class="input-group">
+                                    @Html.PasswordFor(model => model.NovaSenha, new { @class = "form-control", placeholder = "Digite a nova senha", id = "novaSenhaUsuario" })
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('novaSenhaUsuario', this)">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -93,3 +95,21 @@
         </div>
     </div>
 </div>
+
+
+@section scripts {
+    <script>
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
+}

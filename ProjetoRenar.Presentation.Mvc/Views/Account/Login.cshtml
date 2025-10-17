@@ -94,11 +94,18 @@
                                             <label for="inputEmail"><i class="fa fa-envelope" style="color: #ccc;"></i>&nbsp;&nbsp;Email</label>
                                         </div>
 
-                                        <div class="form-label-group">
+                                        <div class="form-label-group position-relative">
                                             @Html.PasswordFor(model => model.SenhaUsuario, new { @id = "inputPassword", @class = "form-control", @placeholder = "Senha", @autocomplete = "off" })
                                             <span class="text-danger" style="font-size: 10pt;">@Html.ValidationMessageFor(model => model.SenhaUsuario)</span>
                                             <label for="inputPassword"><i class="fa fa-key" style="color: #ccc;"></i>&nbsp;&nbsp;Senha</label>
+
+                                            <!-- Ícone do olhinho -->
+                                            <span id="togglePassword"
+                                                  style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #3f6ad8;">
+                                                <i class="fa fa-eye" id="eyeIcon"></i>
+                                            </span>
                                         </div>
+
 
                                         <div class="row mb-3" style="margin-top: -5px;">                                           
                                             <div class="col">
@@ -152,7 +159,7 @@
 
                     <div class="row">
                         <div class="col-md-12 text-center">
-                            <div style="color: #fff;">Copyright © 2024 | Versão 3.3</div>
+                            <div style="color: #fff;">Copyright © 2024 | Versão 3.3.3</div>
                         </div>
                     </div>
 
@@ -190,6 +197,20 @@
                 });
             });
         </script>
+
+        <script>
+            const togglePassword = document.querySelector('#togglePassword');
+            const passwordInput = document.querySelector('#inputPassword');
+            const eyeIcon = document.querySelector('#eyeIcon');
+
+            togglePassword.addEventListener('click', function () {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                eyeIcon.classList.toggle('fa-eye');
+                eyeIcon.classList.toggle('fa-eye-slash');
+            });
+        </script>
+
 
     </div>
 </body>

@@ -285,7 +285,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph title = new Paragraph()
                     .Add(new Text(produto.NomeProduto.ToUpper()).SetBold())
                     .SetTextAlignment(TextAlignment.LEFT)
-                    .SetMarginTop(0)
+                    .SetMarginTop(3)
                     .SetFontSize(8).SetFont(fonteArial);
 
                 document.Add(title);
@@ -295,7 +295,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph title = new Paragraph()
                     .Add(new Text(produto.NomeProduto.ToUpper()).SetBold())
                     .SetTextAlignment(TextAlignment.LEFT)
-                    .SetMarginTop(1)
+                    .SetMarginTop(3)
                     .SetFontSize(6).SetFont(fonteArial);
 
                 document.Add(title);
@@ -305,7 +305,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph title = new Paragraph()
                     .Add(new Text(produto.NomeProduto.ToUpper()).SetBold())
                     .SetTextAlignment(TextAlignment.LEFT)
-                    .SetMarginTop(0)
+                    .SetMarginTop(3)
                     .SetFontSize(5).SetFont(fonteArial);
 
                 document.Add(title);
@@ -316,7 +316,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph pesoParagrafo = new Paragraph($"Peso Líquido: {produto.Peso}")
                 .SetTextAlignment(TextAlignment.RIGHT).SetBold()
                 .SetFontSize(4.5f).SetFont(fonteArial).SetCharacterSpacing(0.8f)
-                .SetMarginTop(-9); // Definindo uma margem superior menor para o parágrafo
+                .SetMarginTop(-11); // Definindo uma margem superior menor para o parágrafo
 
                 document.Add(pesoParagrafo);
             }
@@ -325,7 +325,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph pesoParagrafo = new Paragraph($"Peso Líquido: {produto.Peso}")
                 .SetTextAlignment(TextAlignment.RIGHT).SetBold()
                 .SetFontSize(4.5f).SetFont(fonteArial).SetCharacterSpacing(0.8f)
-                .SetMarginTop(-7); // Definindo uma margem superior menor para o parágrafo
+                .SetMarginTop(-9); // Definindo uma margem superior menor para o parágrafo
 
                 document.Add(pesoParagrafo);
             }
@@ -334,7 +334,7 @@ namespace ProjetoRenar.Presentation.Mvc.Reports
                 Paragraph pesoParagrafo = new Paragraph($"Peso Líquido: {produto.Peso}")
                 .SetTextAlignment(TextAlignment.RIGHT).SetBold()
                 .SetFontSize(4.5f).SetFont(fonteArial).SetCharacterSpacing(0.8f)
-                .SetMarginTop(-5); // Definindo uma margem superior menor para o parágrafo
+                .SetMarginTop(-7); // Definindo uma margem superior menor para o parágrafo
 
                 document.Add(pesoParagrafo);
             }            

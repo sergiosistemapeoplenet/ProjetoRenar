@@ -168,8 +168,8 @@ namespace ProjetoRenar.Presentation.Mvc.Controllers
                 mail.To.Add(emailDestinatario);
                 mail.Subject = "Recuperação de senha solicitada no sistema Renar Etiquetas";
 
-                string urlRecuperacao = $"http://186.202.37.229:99/account/cadastrarnovasenha?token={token}";
-                string logoUrl = "http://186.202.37.229:99/images/peoplenetlogo-novo-peq.png";
+                string urlRecuperacao = $"http://voalzira.renaretiquetas.com.br/Renar/account/cadastrarnovasenha?token={token}";
+                string logoUrl = "http://voalzira.renaretiquetas.com.br/Renar/images/peoplenetlogo-novo-peq.png";
 
                 string corpoEmail = @"
                     <!DOCTYPE html>
@@ -225,11 +225,11 @@ namespace ProjetoRenar.Presentation.Mvc.Controllers
                     </head>
                     <body>
                         <div class='container'>
-                            <img class='logo' src='http://186.202.37.229:99/images/peoplenetlogo-novo-peq.png' alt='Renar Etiquetas'>
+                            <img class='logo' src='http://voalzira.renaretiquetas.com.br/Renar/images/peoplenetlogo-novo-peq.png' alt='Renar Etiquetas'>
                             <h2>Recuperação de Senha</h2>
                             <p>Olá,</p>
                             <p>Recebemos uma solicitação para redefinir sua senha. Clique no botão abaixo para criar uma nova senha.</p>
-                            <a class='button' href='http://186.202.37.229:99/account/cadastrarnovasenha?token=" + token + @"'>Redefinir Senha</a>
+                            <a class='button' href='http://voalzira.renaretiquetas.com.br/Renar/account/cadastrarnovasenha?token=" + token + @"'>Redefinir Senha</a>
                             <p><small>O link expira em 30 minutos.</small></p>
                             <p class='footer'>Este e-mail foi enviado automaticamente, por favor, não responda.</p>
                         </div>
@@ -240,7 +240,7 @@ namespace ProjetoRenar.Presentation.Mvc.Controllers
                 mail.IsBodyHtml = true;
 
                 SmtpClient smtpClient = new SmtpClient("smtplw.com.br", 587);
-                smtpClient.Credentials = new NetworkCredential("sidetech", "lJOoOdCh5452");
+                smtpClient.Credentials = new NetworkCredential("sidetech", "SPpeoplenet25");
                 smtpClient.EnableSsl = true;
 
                 smtpClient.Send(mail);

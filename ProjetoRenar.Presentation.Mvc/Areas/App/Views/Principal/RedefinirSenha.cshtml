@@ -8,7 +8,6 @@
 @model ProjetoRenar.Application.ViewModels.Usuarios.RedefinirSenhaViewModel
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 
-
 <div class="row" style="margin-top: -10px;">
     <div class="col-md-12">
         <div class="card-header-tab card-header">
@@ -22,27 +21,32 @@
             {
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <label>Informe a senha atual:</label>
-                        @Html.PasswordFor(model => model.SenhaAtualUsuario, new { @class = "form-control" })
-                        <div class="text-danger">
-                            @Html.ValidationMessageFor(model => model.SenhaAtualUsuario)
-                        </div>
-                    </div>
-                    <div class="col-md-4">
                         <label>Informe a nova senha:</label>
-                        @Html.PasswordFor(model => model.NovaSenhaUsuario, new { @class = "form-control" })
+                        <div class="input-group">
+                            @Html.PasswordFor(model => model.NovaSenhaUsuario, new { @class = "form-control", id = "novaSenha" })
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('novaSenha', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                         <div class="text-danger">
                             @Html.ValidationMessageFor(model => model.NovaSenhaUsuario)
                         </div>
                     </div>
+
                     <div class="col-md-4">
                         <label>Confirme a nova senha:</label>
-                        @Html.PasswordFor(model => model.NovaSenhaConfirmacao, new { @class = "form-control" })
+                        <div class="input-group">
+                            @Html.PasswordFor(model => model.NovaSenhaConfirmacao, new { @class = "form-control", id = "confirmaSenha" })
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmaSenha', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                         <div class="text-danger">
                             @Html.ValidationMessageFor(model => model.NovaSenhaConfirmacao)
                         </div>
                     </div>
                 </div>
+
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <button class="btn btn-success" onclick="loading()" type="submit">
@@ -51,23 +55,34 @@
                     </div>
                 </div>
             }
-
         </div>
     </div>
 </div>
 
-
-@section scripts{
+@section scripts {
     <script>
-       
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
     </script>
 }
 
-
-@section styles{
-
+@section styles {
+    <style>
+        .btn-outline-secondary {
+            border-color: #ced4da;
+        }
+    </style>
 }
 
 @section modals {
-
 }

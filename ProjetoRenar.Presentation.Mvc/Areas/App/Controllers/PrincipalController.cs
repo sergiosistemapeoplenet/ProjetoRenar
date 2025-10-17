@@ -81,7 +81,6 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
                     var minhaContaUsuario = Newtonsoft.Json.JsonConvert.DeserializeObject
                         <ProjetoRenar.Application.ViewModels.Usuarios.MinhaContaViewModel>(User.Identity.Name);
 
-                    model.SenhaAtualUsuario = SHA256CryptoHelper.CriptografarParaSHA256(model.SenhaAtualUsuario);
                     model.NovaSenhaUsuario = SHA256CryptoHelper.CriptografarParaSHA256(model.NovaSenhaUsuario);
                     model.IDUsuarioInclusao = minhaContaUsuario.IdUsuario;
                     model.EmailInclusao = minhaContaUsuario.EmailUsuario;
@@ -130,13 +129,13 @@ namespace ProjetoRenar.Presentation.Mvc.Areas.App.Controllers
 
             ViewBag.ConsultarQuantidadeImpressaoPeriodo_Geral = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Geral(model.DataInicio.Value, model.DataFim.Value);
             ViewBag.ConsultarQuantidadeImpressaoPeriodo_Regiao = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Regiao(model.DataInicio.Value, model.DataFim.Value);
-            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Unidade(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Unidade(model.DataInicio.Value, model.DataFim.Value).OrderBy(u => u.NomeUnidade).ToList();
             ViewBag.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
             ViewBag.ConsultarQuantidadeImpressaoPeriodo_Produto = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodo_Produto(model.DataInicio.Value, model.DataFim.Value);
 
             ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Geral(model.DataInicio.Value, model.DataFim.Value);
             ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Regiao(model.DataInicio.Value, model.DataFim.Value);
-            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade = unitOfWork.DashboardRepository.ConsuConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade(model.DataInicio.Value, model.DataFim.Value);
+            ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade = unitOfWork.DashboardRepository.ConsuConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade(model.DataInicio.Value, model.DataFim.Value).OrderBy(u => u.NomeUnidade).ToList();
             ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_TipoDeProduto(model.DataInicio.Value, model.DataFim.Value);
             ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto = unitOfWork.DashboardRepository.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Produto(model.DataInicio.Value, model.DataFim.Value);
 

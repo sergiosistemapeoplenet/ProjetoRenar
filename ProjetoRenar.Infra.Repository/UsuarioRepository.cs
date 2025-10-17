@@ -82,11 +82,6 @@ namespace ProjetoRenar.Infra.Repository
 
         public void RedefinirSenha(int? idUsuario, string senhaAtual, string novaSenha)
         {
-            var consulta = "select * from Acesso.Usuario where IDUsuario = @idUsuario and SenhaUsuario = @senhaAtual";
-            var dados = _connection.QueryFirstOrDefault<Usuario>(consulta, new { idUsuario, senhaAtual });
-            if (dados == null)
-                throw new Exception("Senha atual inválida. Verifique e tente novamente.");
-
             var query = "update Acesso.Usuario set FlagPrimeiroAcesso = 0, SenhaUsuario = @novaSenha where IDUsuario = @idUsuario and SenhaUsuario = @senhaAtual";
             _connection.Execute(query, new { idUsuario, senhaAtual, novaSenha });
         }

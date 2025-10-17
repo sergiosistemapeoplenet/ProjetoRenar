@@ -30,18 +30,28 @@
                     </div>
                     <div class="col-md-4">
                         <label>Senha de acesso:</label>
-                        @Html.PasswordFor(model => model.SenhaUsuario, new { @class = "form-control" })
+                        <div class="input-group">
+                            @Html.PasswordFor(model => model.SenhaUsuario, new { @class = "form-control", placeholder = "Digite a senha", id = "senhaUsuario" })
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('senhaUsuario', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                         <div class="text-danger">
                             @Html.ValidationMessageFor(model => model.SenhaUsuario)
                         </div>
                     </div>
                     <div class="col-md-4">
                         <label>Confirme sua senha:</label>
-                        @Html.PasswordFor(model => model.SenhaConfirmacao, new { @class = "form-control" })
+                        <div class="input-group">
+                            @Html.PasswordFor(model => model.SenhaConfirmacao, new { @class = "form-control", placeholder = "Confirme a senha", id = "senhaConfirmacao" })
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('senhaConfirmacao', this)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                         <div class="text-danger">
                             @Html.ValidationMessageFor(model => model.SenhaConfirmacao)
                         </div>
-                    </div>                   
+                    </div>
                 </div>
 
                 <div class="mb-3 row">
@@ -76,3 +86,20 @@
         </div>
     </div>
 </div>
+
+@section scripts {
+    <script>
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
+}

@@ -217,7 +217,7 @@
             <div class="card" id="card_unidade">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-12">
 
                             <div class="mb-3">
                                 <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões no período:</strong>
@@ -226,7 +226,7 @@
                             @{
                                 var dadosPeriodoUnidade = (List<ConsultarQuantidadeImpressaoPeriodo_Unidade>)ViewBag.ConsultarQuantidadeImpressaoPeriodo_Unidade;
 
-                                <table class="table table-sm table-bordered">
+                                <table id="tabelaUnidades" class="table table-sm table-bordered">
                                     <thead>
                                         <tr>
                                             <th>Unidade</th>
@@ -249,48 +249,15 @@
                                         </tr>
                                     </tfoot>
                                 </table>
+                                <br/>
                             }
 
                         </div>
 
-                        <div class="col-md-7">
+                        @{
+                            var dadosAgrupadoMesUnidade = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade;
 
-                            <div class="mb-3">
-                                <strong><i class="fa fa-print"></i>&nbsp;Quantidade de impressões agrupado no período por mês/ano:</strong>
-                            </div>
-
-                            @{
-                                var dadosAgrupadoMesUnidade = (List<ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade>)ViewBag.ConsultarQuantidadeImpressaoPeriodoAgrupadoPorMes_Unidade;
-
-                                <table class="table table-sm table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Unidade</th>
-                                            <th>Mês/Ano</th>
-                                            <th>Quantidade</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in dadosAgrupadoMesUnidade)
-                                        {
-                                            <tr>
-                                                <td>@(item.NomeUnidade != null ? item.NomeUnidade.ToUpper() : string.Empty)</td>
-                                                <td>@item.MesAno</td>
-                                                <td>@item.Quantidade</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td style="font-weight: bold;">@dadosAgrupadoMesUnidade.Count() Unidades</td>
-                                            <td></td>
-                                            <td style="font-weight: bold"> @dadosPeriodoGeral.FirstOrDefault().Quantidade</td>
-                                        </tr>
-                                    </tfoot>
-                                </table>
-                            }
-
-                        </div>
+                        }
 
                     </div>
 
@@ -489,6 +456,42 @@
 
 
 @section scripts{
+
+    <script>
+        $(document).ready(function () {
+            $('#tabelaUnidades').DataTable({
+                paging: false,       
+                searching: true,     
+                ordering: true,     
+                info: false,      
+                language: {
+                    decimal: ",",
+                    thousands: ".",
+                    search: "Filtrar unidades: ",
+                    zeroRecords: "Nenhum registro encontrado",
+                    infoEmpty: "Sem registros disponíveis",
+                    infoFiltered: "(filtrado de _MAX_ registros no total)",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    loadingRecords: "Carregando...",
+                    processing: "Processando...",
+                    paginate: {
+                        first: "Primeiro",
+                        last: "Último",
+                        next: "Próximo",
+                        previous: "Anterior"
+                    },
+                    aria: {
+                        sortAscending: ": ativar para ordenar a coluna em ordem crescente",
+                        sortDescending: ": ativar para ordenar a coluna em ordem decrescente"
+                    }
+                },
+                order: [[0, "asc"]] // 🔸 Ordena inicialmente pela 2ª coluna (Quantidade)
+            });
+        });
+    </script>
+
+
+
     <script>
         $(document).ready(function () {
             // Verifica qual checkbox está marcado ao carregar a página
@@ -646,7 +649,8 @@
 
         var options2 = {
             chart: {
-                type: 'column'
+                type: 'column',
+                height: 1600
             },
             title: {
                 text: null
